@@ -1,9 +1,9 @@
 // @unocss-include
 import type { DefineComponent, VNode } from 'vue'
-import { defineComponent, h, reactive } from 'vue'
+import { defineComponent, h, reactive, ref } from 'vue'
 import type { FormRules } from 'element-plus'
-import { ElCheckbox, ElCheckboxGroup, ElDatePicker, ElForm, ElFormItem, ElInput, ElInputNumber, ElOption, ElRadio, ElRadioGroup, ElSelect, ElSwitch } from 'element-plus'
-import type { TypeComponent } from './types'
+import { ElCascader, ElCheckbox, ElCheckboxButton, ElCheckboxGroup, ElDatePicker, ElForm, ElFormItem, ElInput, ElInputNumber, ElOption, ElRadio, ElRadioButton, ElRadioGroup, ElSelect, ElSwitch } from 'element-plus'
+import type { Schema, TypeComponent } from './types'
 
 export const jsonSchemaTransformForm = defineComponent({
   props: {
@@ -15,9 +15,14 @@ export const jsonSchemaTransformForm = defineComponent({
   setup(props, { expose }) {
     const model = reactive<Record<string, any>>({})
     const rules = reactive<FormRules>({})
+    const formEl = ref<HTMLFormElement>()
     expose({
       getFormData: () => model,
+      submit: () => new Promise((resolve) => {
+        formEl.value!.validate((valid: boolean) => resolve(valid && model))
+      }),
     })
+
     return () => h('div', [
       h('h3', {
         class: 'text-2xl mb-2',
@@ -26,15 +31,17 @@ export const jsonSchemaTransformForm = defineComponent({
         class: 'text-sm mb-3',
       }, props.schema.description),
       h(ElForm, {
+        ref: formEl,
         model,
         rules,
+        size: props.schema.size,
         class: props.schema.class,
       }, { default: () => sortForm(renderForm(props.schema.form)) })])
 
     function renderForm(form: Record<string, any>) {
       const formList: any[] = []
       for (const key in form) {
-        const { default: value, type, title, rule, class: className, style, description, show, maxlength, min, max } = form[key]
+        const { default: value, type, title, rule, class: className, style, description, show, maxlength, minlength, options, values, min, max, disabled, disables, border, precision, step, debounce = 300, placeholder } = form[key]
         if (value !== undefined)
           model[key] = value || ''
         if (typeof rule === 'object') {
@@ -57,53 +64,83 @@ export const jsonSchemaTransformForm = defineComponent({
             'class': className,
             style,
             maxlength,
+            minlength,
             type,
+            placeholder,
+            disabled,
             'onUpdate:modelValue': modelValue,
           }),
+          textarea: () => typeComponent.string('textarea'),
           password: () => typeComponent.string('password'),
           datepicker: () => h(ElDatePicker, {
             'modelValue': model[key],
             'class': className,
             style,
+            disabled,
             'onUpdate:modelValue': modelValue,
           }),
           number: () => h(ElInputNumber, {
             'modelValue': model[key] || 0,
             'class': className,
             style,
+            disabled,
             min,
             max,
+            precision,
+            step,
             'onUpdate:modelValue': modelValue,
           }),
           select: () => h(ElSelect, {
             'modelValue': model[key],
             'class': className,
             style,
+            disabled,
+            placeholder,
             'onUpdate:modelValue': modelValue,
           },
-          { default: () => (form[key]?.options || []).map((item: any, i: number) => h(ElOption, { value: form[key]?.values?.[i] || i, label: item })) },
+          { default: () => (options || []).map((item: any, i: number) => h(ElOption, { value: values?.[i] || i, label: item })) },
           ),
           switch: () => h(ElSwitch, {
             'modelValue': model[key] || 0,
             'class': className,
             style,
+            disabled,
             'onUpdate:modelValue': modelValue,
           }),
-          radio: () => h(ElRadioGroup, {
+          radio: (type = 'radio') => h(ElRadioGroup, {
             'modelValue': model[key] || 0,
             'class': className,
             style,
+            disabled,
             'onUpdate:modelValue': modelValue,
           }, {
-            default: () => (form[key]?.options || []).map((item: any, i: number) => h(ElRadio, { label: form[key]?.values?.[i] || item }, { default: () => item })),
+            default: () => (options || []).map((item: any, i: number) => h(type === 'radio'
+              ? ElRadio
+              : ElRadioButton, { label: values?.[i] || item, disabled: disables?.[i], border }, { default: () => item })),
           }),
-          checkbox: () => h(ElCheckboxGroup, {
+          checkbox: (type = 'checkbox') => h(ElCheckboxGroup, {
             'modelValue': model[key] || [],
             'class': className,
             style,
+            disabled,
             'onUpdate:modelValue': modelValue,
           }, {
-            default: () => (form[key]?.options || []).map((item: any, i: number) => h(ElCheckbox, { label: form[key]?.values?.[i] || item }, { default: () => item })),
+            default: () => (form[key]?.options || []).map((item: any, i: number) => h(type === 'checkbox'
+              ? ElCheckbox
+              : ElCheckboxButton, { label: values?.[i] || item, disabled: disables?.[i], border }, { default: () => item })),
+          }),
+          checkboxButton: () => typeComponent.checkbox('checkboxButton'),
+          radioButton: () => typeComponent.radio('radioButton'),
+          cascader: () => h(ElCascader, {
+            'modelValue': model[key] || [],
+            'class': className,
+            options,
+            debounce,
+            style,
+            disabled,
+            placeholder,
+            'filterable': true,
+            'onUpdate:modelValue': modelValue,
           }),
         }
         if (!show || model[show]) {
@@ -150,4 +187,4 @@ export const jsonSchemaTransformForm = defineComponent({
       return formList
     }
   },
-}) as DefineComponent<{ schema: Record<string, any> }, {}, { getFormData: () => Record<string, any> }>
+}) as DefineComponent<{ schema: Schema }, {}, { getFormData: () => Record<string, any>; submit: () => Promise<boolean | Record<string, any>> }>
