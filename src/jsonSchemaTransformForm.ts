@@ -1,8 +1,9 @@
 // @unocss-include
-import type { DefineComponent, VNode } from 'vue'
+import type { DefineComponent } from 'vue'
 import { defineComponent, h, reactive, ref } from 'vue'
 import type { FormRules } from 'element-plus'
 import { ElCascader, ElCheckbox, ElCheckboxButton, ElCheckboxGroup, ElDatePicker, ElForm, ElFormItem, ElInput, ElInputNumber, ElOption, ElRadio, ElRadioButton, ElRadioGroup, ElSelect, ElSwitch } from 'element-plus'
+import { sortByOrder } from 'simon-js-tool'
 import type { Schema, TypeComponent } from './types'
 
 export const jsonSchemaTransformForm = defineComponent({
@@ -36,7 +37,7 @@ export const jsonSchemaTransformForm = defineComponent({
         rules,
         size: props.schema.size,
         class: props.schema.class,
-      }, { default: () => sortForm(renderForm(props.schema.form)) })])
+      }, { default: () => sortByOrder(renderForm(props.schema.form), props.schema.order, 'props.prop') })])
 
     function renderForm(form: Record<string, any>) {
       const formList: any[] = []
@@ -159,30 +160,6 @@ export const jsonSchemaTransformForm = defineComponent({
         function modelValue(val: any) {
           model[key] = val
         }
-      }
-      return formList
-    }
-
-    function sortForm(formList: VNode[]) {
-      const order: string[] = props.schema.order
-      if (order) {
-        const newFormList: VNode[] = []
-        let insertIndex
-        order.forEach((key, idx) => {
-          if (key === '*')
-            return insertIndex = idx
-
-          const index = formList.findIndex(item => item?.props?.prop === key)
-          if (index !== -1) {
-            newFormList.push(formList[index])
-            formList.splice(index, 1)
-          }
-        })
-        if (insertIndex !== undefined)
-          newFormList.splice(insertIndex, 0, ...formList)
-        else
-          newFormList.concat(formList)
-        return newFormList
       }
       return formList
     }
