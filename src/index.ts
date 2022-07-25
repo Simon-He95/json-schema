@@ -1,2 +1,2 @@
 export * from './types'
-export { mySchema } from './component'
+export { jsonSchemaTransformForm } from './jsonSchemaTransformForm'

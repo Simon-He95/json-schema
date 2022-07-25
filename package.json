@@ -1,19 +1,19 @@
 {
-  "name": "json-schema",
+  "name": "json-schema-transform-form",
   "version": "0.0.1",
   "packageManager": "pnpm@6.32.3",
-  "description": "json-schema",
+  "description": "json-schema-transform-form",
   "author": "Simon He",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git + git@github.com:Simon-He95/json-schema.git"
+    "url": "git + git@github.com:Simon-He95/json-schema-transform-form.git"
   },
   "bugs": {
-    "url": "https://github.com/Simon-He95/json-schema/issues"
+    "url": "https://github.com/Simon-He95/json-schema-transform-form/issues"
   },
   "keywords": [
-    "json-schema",
+    "json-schema-transform-form",
     "vue"
   ],
   "exports": {

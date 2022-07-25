@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import routes from 'virtual:generated-pages'
 import ElementPlus from 'element-plus'
-import { mySchema } from '../../src'
+import { jsonSchemaTransformForm } from '../../src'
 import App from './App.vue'
 import 'element-plus/dist/index.css'
 
@@ -16,5 +16,5 @@ const router = createRouter({
 })
 app.use(router)
 app.use(ElementPlus)
-app.component('MySchema', mySchema)
+app.component('MySchema', jsonSchemaTransformForm)
 app.mount('#app')

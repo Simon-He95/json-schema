@@ -1,0 +1,97 @@
+{
+  "description": "A simple form example.",
+  "order": [
+    "firstName",
+    "lastName",
+    "bio",
+    "*",
+    "date",
+    "switch",
+    "age"
+  ],
+  "form": {
+    "age": {
+      "max": 80,
+      "min": 16,
+      "title": "Age:",
+      "description": "Enter your age.",
+      "type": "number",
+      "show": "switch"
+    },
+    "bio": {
+      "maxlength": 10,
+      "title": "Bio:",
+      "type": "string",
+      "rule": {
+        "[0-9]": "Must contain at least one number.",
+        "[a-zA-Z]": "Must contain at least one alpha."
+      }
+    },
+    "checkbox": {
+      "options": [
+        "选项一",
+        "选项二"
+      ],
+      "title": "多选:",
+      "type": "checkbox"
+    },
+    "date": {
+      "title": "日期:",
+      "type": "datepicker"
+    },
+    "firstName": {
+      "default": "Jun",
+      "title": "First name:",
+      "type": "string"
+    },
+    "lastName": {
+      "rule": "必须输入Last Name",
+      "title": "Last name:",
+      "type": "string"
+    },
+    "password": {
+      "title": "Password:",
+      "type": "password"
+    },
+    "price": {
+      "description": "最多输入两位小数点，最大值 999999.99",
+      "format": "price",
+      "title": "价格:",
+      "type": "string"
+    },
+    "radio": {
+      "options": [
+        "选项一",
+        "选项二"
+      ],
+      "title": "单选:",
+      "type": "radio"
+    },
+    "select": {
+      "options": [
+        "Zone one",
+        "Zone two"
+      ],
+      "title": "Activity zone:",
+      "type": "select",
+      "values": [
+        "1",
+        "2"
+      ]
+    },
+    "switch": {
+      "title": "开关:",
+      "type": "switch",
+      "style": "--el-switch-on-color: #ff4949;  --el-switch-off-color: #13ce66;"
+    },
+    "telephone": {
+      "minLength": 10,
+      "title": "Telephone:",
+      "type": "string",
+      "rule": {
+        "^1([38]\\d|5[0-35-9]|7[3678])\\d{8}$": "请输入正确的手机号码"
+      }
+    }
+  },
+  "title": "Schema Form"
+}
