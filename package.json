@@ -1,6 +1,6 @@
 {
   "name": "json-schema-transform-form",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "packageManager": "pnpm@6.32.3",
   "description": "json-schema-transform-form",
   "author": "Simon He",
@@ -30,7 +30,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "pkgroll --minify",
+    "appendUnocss": "esno ./utils/index.ts",
+    "build": "pkgroll && pnpm run appendUnocss",
     "dev": "pkgroll --watch",
     "play": "pnpm run -C playground dev",
     "play:build": "pnpm run -C playground build",
@@ -58,7 +59,7 @@
     "eslint-plugin-n": "^15.2.1",
     "json-schema-transform-form": "workspace:^0.0.4",
     "pkgroll": "^1.3.1",
-    "simon-js-tool": "^4.0.2",
+    "simon-js-tool": "^4.0.3",
     "typescript": "^4.7.2",
     "vite": "^3.0.2",
     "vitest": "^0.13.1"
