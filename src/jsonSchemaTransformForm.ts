@@ -1,5 +1,5 @@
 // @unocss-include
-import type { DefineComponent } from 'vue'
+import type { DefineComponent, VNode } from 'vue'
 import { defineComponent, h, reactive, ref } from 'vue'
 import type { FormRules } from 'element-plus'
 import { ElCascader, ElCheckbox, ElCheckboxButton, ElCheckboxGroup, ElDatePicker, ElForm, ElFormItem, ElInput, ElInputNumber, ElOption, ElRadio, ElRadioButton, ElRadioGroup, ElSelect, ElSwitch } from 'element-plus'
@@ -23,7 +23,6 @@ export const jsonSchemaTransformForm = defineComponent({
         formEl.value!.validate((valid: boolean) => resolve(valid && model))
       }),
     })
-
     return () => h('div', [
       h('h3', {
         class: 'text-2xl mb-2',
@@ -40,10 +39,11 @@ export const jsonSchemaTransformForm = defineComponent({
       }, { default: () => sortByOrder(renderForm(props.schema.form), props.schema.order, 'props.prop') })])
 
     function renderForm(form: Record<string, any>) {
-      const formList: any[] = []
+      const formList: VNode[] = []
       for (const key in form) {
-        const { default: value, type, title, rule, class: className, style, description, show, maxlength, minlength, options, values, min, max, disabled, disables, border, precision, step, debounce = 300, placeholder } = form[key]
-        if (value !== undefined)
+        const { default: value, type, title, rule, class: className, style, description, show, maxlength, minlength, options, values, min, max, disabled, disables, border, precision, step, debounce = 300, placeholder, children } = form[key]
+        const isShow = judgeShow()
+        if (value !== undefined && isShow)
           model[key] = value || ''
         if (typeof rule === 'object') {
           rules[key] = [{
@@ -61,7 +61,7 @@ export const jsonSchemaTransformForm = defineComponent({
         else if (rule) { rules[key] = [{ required: true, message: rule }] }
         const typeComponent: TypeComponent = {
           string: (type = 'text') => h(ElInput, {
-            'modelValue': model[key] || '',
+            'modelValue': model[key],
             'class': className,
             style,
             maxlength,
@@ -109,7 +109,7 @@ export const jsonSchemaTransformForm = defineComponent({
             'onUpdate:modelValue': modelValue,
           }),
           radio: (type = 'radio') => h(ElRadioGroup, {
-            'modelValue': model[key] || 0,
+            'modelValue': model[key],
             'class': className,
             style,
             disabled,
@@ -144,21 +144,42 @@ export const jsonSchemaTransformForm = defineComponent({
             'onUpdate:modelValue': modelValue,
           }),
         }
-        if (!show || model[show]) {
-          formList.push(h(ElFormItem, {
-            label: title,
-            prop: key,
-            style: {
-              display: 'block',
-            },
-          }, {
-            default: () => [h('div', {
-              class: ' w-full text-1 lh-4 text-gray-600:50 mb-1',
-            }, description), typeComponent[type as keyof TypeComponent]()],
-          }))
-        }
+        if (!type)
+          throw new Error(`type is required in ${form}`)
+        formList.push(h(ElFormItem, {
+          label: title,
+          prop: key,
+          style: {
+            display: isShow
+              ? 'block'
+              : 'none',
+          },
+        }, {
+          default: () => [h('div', {
+            class: ' w-full text-1 lh-4 text-gray-600:50 mb-1',
+          }, description), typeComponent[type as keyof TypeComponent]()],
+        }))
+        if (children)
+          formList.push(...renderForm(children))
+
         function modelValue(val: any) {
           model[key] = val
+        }
+        function judgeShow() {
+          if (!show)
+            return true
+          let showValue = true
+          show?.replace(/{{\s{0,}([\w.>]+)\s{0,}}}(.*)/, (e: any, r: any, q: any) => {
+            const val = r.split('.').reduce((o: any, k: string) => o[k], model)
+            try {
+              showValue = eval(val + q)
+            }
+            catch (error) {
+              showValue = eval(String(!!val))
+            }
+            return showValue
+          })
+          return showValue
         }
       }
       return formList
