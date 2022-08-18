@@ -14,11 +14,11 @@ export interface TypeComponent {
   CheckboxButton: () => VNode
   RadioButton: () => VNode
   Cascader: () => VNode
+  Upload: () => VNode
 }
 
 export interface Schema {
   size?: 'small' | 'large' | 'default'
-  order?: string[]
   name?: string
   description?: string
   attribs: Record<string, any>
