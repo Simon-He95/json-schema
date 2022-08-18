@@ -1,9 +1,9 @@
 // @unocss-include
 import type { DefineComponent, VNode } from 'vue'
-import { defineComponent, h, reactive, ref } from 'vue'
+import { defineComponent, h, reactive, ref, watch, watchEffect } from 'vue'
 import type { FormRules } from 'element-plus'
-import { ElCascader, ElCheckbox, ElCheckboxButton, ElCheckboxGroup, ElDatePicker, ElForm, ElFormItem, ElInput, ElInputNumber, ElOption, ElRadio, ElRadioButton, ElRadioGroup, ElSelect, ElSwitch } from 'element-plus'
-import { sortByOrder } from 'simon-js-tool'
+import { ElCascader, ElCheckbox, ElCheckboxButton, ElCheckboxGroup, ElCol, ElDatePicker, ElForm, ElFormItem, ElInput, ElInputNumber, ElOption, ElRadio, ElRadioButton, ElRadioGroup, ElRow, ElSelect, ElSwitch } from 'element-plus'
+import { addStyle } from 'simon-js-tool'
 import type { Schema, TypeComponent } from './types'
 
 export const jsonSchemaTransformForm = defineComponent({
@@ -14,53 +14,62 @@ export const jsonSchemaTransformForm = defineComponent({
     },
   },
   setup(props, { expose }) {
+    const schema = ref(props.schema)
     const model = reactive<Record<string, any>>({})
     const rules = reactive<FormRules>({})
     const formEl = ref<HTMLFormElement>()
+    let styles = ''
+    let remove: () => void
+    watch(props, () => {
+      schema.value = props.schema
+    })
     expose({
       getFormData: () => model,
       submit: () => new Promise((resolve) => {
         formEl.value!.validate((valid: boolean) => resolve(valid && model))
       }),
     })
-    return () => h('div', [
-      h('h3', {
-        class: 'text-2xl mb-2',
-      }, props.schema.title),
-      h('h1', {
-        class: 'text-sm mb-3',
-      }, props.schema.description),
-      h(ElForm, {
-        ref: formEl,
-        model,
-        rules,
-        size: props.schema.size,
-        class: props.schema.class,
-      }, { default: () => sortByOrder(renderForm(props.schema.form), props.schema.order, 'props.prop') })])
+    return () => schema.value
+      ? h('div', {
+        style: {
+          textAlign: 'left',
+        },
+      }, [
+        h('h3', {
+          class: 'text-2xl mb-2',
+        }, props.schema.name),
+        h('h1', {
+          class: 'text-sm mb-3',
+        }, props.schema.description),
+        h(ElForm, {
+          ref: formEl,
+          model,
+          rules,
+          size: props.schema.size,
+          class: props.schema.class,
+        }, { default: () => wrapper(renderForm(props.schema.attribs)) })])
+      : ''
 
     function renderForm(form: Record<string, any>) {
       const formList: VNode[] = []
       for (const key in form) {
-        const { default: value, type, title, rule, class: className, style, description, show, maxlength, minlength, options, values, min, max, disabled, disables, border, precision, step, debounce = 300, placeholder, children } = form[key]
-        const isShow = judgeShow()
-        if (value !== undefined && isShow)
+        const { default: value, key: _key, type, size, colorTitle, name, regExp, errMsg, required, class: className, position, style, description, show, maxlength, minlength, options, values, min, max, disabled, disables, border, precision, step, debounce = 300, placeholder, children } = form[key]
+        watchEffect(() => judgeShow(), {
+          flush: 'post',
+        })
+        if (value !== undefined)
           model[key] = value || ''
-        if (typeof rule === 'object') {
+        if (regExp) {
+          const reg = new RegExp(regExp)
           rules[key] = [{
-            required: true,
             validator: (o, value, callback) => {
-              for (const key in rule) {
-                if (!new RegExp(key).test(value))
-                  return callback(new Error(rule[key]))
-              }
-              callback()
+              if (!reg.test(value))
+                return callback(new Error(errMsg || `${key} is invalid`))
             },
-            trigger: 'blur',
           }]
         }
-        else if (rule) { rules[key] = [{ required: true, message: rule }] }
         const typeComponent: TypeComponent = {
-          string: (type = 'text') => h(ElInput, {
+          Text: (type = 'text') => h(ElInput, {
             'modelValue': model[key],
             'class': className,
             style,
@@ -71,17 +80,18 @@ export const jsonSchemaTransformForm = defineComponent({
             disabled,
             'onUpdate:modelValue': modelValue,
           }),
-          textarea: () => typeComponent.string('textarea'),
-          password: () => typeComponent.string('password'),
-          datepicker: () => h(ElDatePicker, {
+          Email: () => typeComponent.Text(),
+          RichText: () => typeComponent.Text('textarea'),
+          Password: () => typeComponent.Text('password'),
+          Date: () => h(ElDatePicker, {
             'modelValue': model[key],
             'class': className,
             style,
             disabled,
             'onUpdate:modelValue': modelValue,
           }),
-          number: () => h(ElInputNumber, {
-            'modelValue': model[key] || 0,
+          Number: () => h(ElInputNumber, {
+            'modelValue': model[key] || (model[key] = 0),
             'class': className,
             style,
             disabled,
@@ -91,7 +101,14 @@ export const jsonSchemaTransformForm = defineComponent({
             step,
             'onUpdate:modelValue': modelValue,
           }),
-          select: () => h(ElSelect, {
+          switch: () => h(ElSwitch, {
+            'modelValue': model[key] || (model[key] = 0),
+            'class': className,
+            style,
+            disabled,
+            'onUpdate:modelValue': modelValue,
+          }),
+          Enumeration: () => h(ElSelect, {
             'modelValue': model[key],
             'class': className,
             style,
@@ -101,14 +118,14 @@ export const jsonSchemaTransformForm = defineComponent({
           },
           { default: () => (options || []).map((item: any, i: number) => h(ElOption, { value: values?.[i] || i, label: item })) },
           ),
-          switch: () => h(ElSwitch, {
-            'modelValue': model[key] || 0,
+          Boolean: () => h(ElSwitch, {
+            'modelValue': model[key] || (model[key] = 0),
             'class': className,
             style,
             disabled,
             'onUpdate:modelValue': modelValue,
           }),
-          radio: (type = 'radio') => h(ElRadioGroup, {
+          Radio: (type = 'radio') => h(ElRadioGroup, {
             'modelValue': model[key],
             'class': className,
             style,
@@ -119,21 +136,23 @@ export const jsonSchemaTransformForm = defineComponent({
               ? ElRadio
               : ElRadioButton, { label: values?.[i] || item, disabled: disables?.[i], border }, { default: () => item })),
           }),
-          checkbox: (type = 'checkbox') => h(ElCheckboxGroup, {
-            'modelValue': model[key] || [],
-            'class': className,
-            style,
-            disabled,
-            'onUpdate:modelValue': modelValue,
-          }, {
-            default: () => (form[key]?.options || []).map((item: any, i: number) => h(type === 'checkbox'
-              ? ElCheckbox
-              : ElCheckboxButton, { label: values?.[i] || item, disabled: disables?.[i], border }, { default: () => item })),
-          }),
-          checkboxButton: () => typeComponent.checkbox('checkboxButton'),
-          radioButton: () => typeComponent.radio('radioButton'),
-          cascader: () => h(ElCascader, {
-            'modelValue': model[key] || [],
+          Checkbox: (type = 'checkbox') => {
+            return h(ElCheckboxGroup, {
+              'modelValue': model[key] || (model[key] = []),
+              'class': className,
+              style,
+              disabled,
+              'onUpdate:modelValue': modelValue,
+            }, {
+              default: () => (options || []).map((item: any, i: number) => h(type === 'checkbox'
+                ? ElCheckbox
+                : ElCheckboxButton, { label: values?.[i] || item, disabled: disables?.[i], border }, { default: () => item })),
+            })
+          },
+          CheckboxButton: () => typeComponent.Checkbox('checkboxButton'),
+          RadioButton: () => typeComponent.Radio('radioButton'),
+          Cascader: () => h(ElCascader, {
+            'modelValue': model[key] || (model[key] = []),
             'class': className,
             options,
             debounce,
@@ -146,19 +165,25 @@ export const jsonSchemaTransformForm = defineComponent({
         }
         if (!type)
           throw new Error(`type is required in ${form}`)
-        formList.push(h(ElFormItem, {
-          label: title,
+        styles += `
+          .json_${type + _key} .el-form-item__label{
+            color:${colorTitle};
+          }
+          `
+        const formItem = h(ElFormItem, {
+          label: name,
           prop: key,
-          style: {
-            display: isShow
-              ? 'block'
-              : 'none',
-          },
+          required: !!required,
+          class: `json_${type + _key}`,
+          position,
+          size,
         }, {
           default: () => [h('div', {
             class: ' w-full text-1 lh-4 text-gray-600:50 mb-1',
           }, description), typeComponent[type as keyof TypeComponent]()],
-        }))
+        })
+
+        formList.push(formItem)
         if (children)
           formList.push(...renderForm(children))
 
@@ -166,23 +191,74 @@ export const jsonSchemaTransformForm = defineComponent({
           model[key] = val
         }
         function judgeShow() {
+          const el = document.querySelector(`.json_${type + _key}`)! as HTMLElement
+          if (!el)
+            return
           if (!show)
-            return true
-          let showValue = true
-          show?.replace(/{{\s{0,}([\w.>]+)\s{0,}}}(.*)/, (e: any, r: any, q: any) => {
-            const val = r.split('.').reduce((o: any, k: string) => o[k], model)
-            try {
-              showValue = eval(val + q)
+            return el.style.display = 'block'
+          for (let i = 0; i < show?.length; i++) {
+            const item = show[i]
+            const val = model[item.relevancy]
+            const type = item.controlType
+            if (type === 'value') {
+              if (!val)
+                return el.style.display = 'none'
             }
-            catch (error) {
-              showValue = eval(String(!!val))
+            else {
+              if (!item.controlReg)
+                continue
+              const reg = new RegExp(item.controlReg)
+              if (!reg.test(val))
+                return el.style.display = 'none'
             }
-            return showValue
-          })
-          return showValue
+          }
+          return el.style.display = 'block'
         }
       }
       return formList
+    }
+    function wrapper(data: any[]) {
+      if (remove)
+        remove?.()
+      remove = addStyle(styles)
+      const g1 = transformData(data.filter((item: any) => item.props.position.startsWith('0-')).sort(sortIndex))
+      const g2 = transformData(data.filter((item: any) => item.props.position.startsWith('1-')).sort(sortIndex))
+      const g3 = transformData(data.filter((item: any) => item.props.position.startsWith('2-')).sort(sortIndex))
+      const max = Math.max(g1.length, g2.length, g3.length)
+      const result = []
+      for (let i = 0; i < max; i++) {
+        const col: any[] = []
+        const l_1 = (g1[i]?.props && g1[i].props.label) ? 1 : 0
+        const l_2 = (g2[i]?.props && g2[i].props.label) ? 1 : 0
+        const l_3 = (g3[i]?.props && g3[i].props.label) ? 1 : 0
+        const level = l_1 + l_2 + l_3
+        l_1 && col.push(h(ElCol, { span: level === 3 ? 8 : level === 2 ? 12 : 24 }, { default: () => g1[i] }))
+        l_2 && col.push(h(ElCol, { span: level === 3 ? 8 : level === 2 ? 12 : 24 }, { default: () => g2[i] }))
+        l_3 && col.push(h(ElCol, { span: level === 3 ? 8 : level === 2 ? 12 : 24 }, { default: () => g3[i] }))
+        result.push(h(ElRow, { gutter: 10 }, {
+          default: () => col,
+        }))
+      }
+      return result
+      function sortIndex(a: any, b: any) {
+        if (!b)
+          return -1
+        return a.props.position.split('-')[1] - b.props.position.split('-')[1]
+      }
+      function transformData(data: any[]) {
+        if (!data.length)
+          return []
+        const [col, n] = data[0]?.props.position?.split('-')
+        if (+n === 0)
+          return data
+        for (let i = +n - 1; i >= 0; i--) {
+          data.unshift({
+            name: '',
+            id: `${col}-${n}`,
+          })
+        }
+        return data
+      }
     }
   },
 }) as DefineComponent<{ schema: Schema }, {}, { getFormData: () => Record<string, any>; submit: () => Promise<boolean | Record<string, any>> }>
