@@ -2,8 +2,9 @@
 import type { DefineComponent, VNode } from 'vue'
 import { defineComponent, h, reactive, ref, watch, watchEffect } from 'vue'
 import type { FormRules } from 'element-plus'
-import { ElCascader, ElCheckbox, ElCheckboxButton, ElCheckboxGroup, ElCol, ElDatePicker, ElForm, ElFormItem, ElInput, ElInputNumber, ElOption, ElRadio, ElRadioButton, ElRadioGroup, ElRow, ElSelect, ElSwitch } from 'element-plus'
+import { ElCascader, ElCheckbox, ElCheckboxButton, ElCheckboxGroup, ElCol, ElDatePicker, ElForm, ElFormItem, ElIcon, ElInput, ElInputNumber, ElOption, ElRadio, ElRadioButton, ElRadioGroup, ElRow, ElSelect, ElSwitch, ElUpload } from 'element-plus'
 import { addStyle } from 'simon-js-tool'
+import { Plus } from '@element-plus/icons-vue'
 import type { Schema, TypeComponent } from './types'
 
 export const jsonSchemaTransformForm = defineComponent({
@@ -53,8 +54,9 @@ export const jsonSchemaTransformForm = defineComponent({
     function renderForm(form: Record<string, any>) {
       const formList: VNode[] = []
       for (const key in form) {
-        const { default: value, key: _key, type, size, limit = 1, colorTitle, name, regExp, errMsg, required, class: className, position, style, description, show, maxlength, minlength, options, values, min, max, disabled, disables, border, precision, step, debounce = 300, placeholder, children } = form[key]
-        watchEffect(() => judgeShow(), {
+        const { default: value, key: _key, type, size, limit = 1, cascaderType, colorTitle, json, label, regExp, errMsg, required, class: className, position, style, description, show, maxlength, minlength, options, values, min, max, disabled, disables, border, precision, step, debounce = 300, placeholder, children } = form[key]
+        const formItemClass = `json_${type + _key}`
+        watchEffect(judgeShow, {
           flush: 'post',
         })
         if (value !== undefined)
@@ -101,13 +103,6 @@ export const jsonSchemaTransformForm = defineComponent({
             step,
             'onUpdate:modelValue': modelValue,
           }),
-          switch: () => h(ElSwitch, {
-            'modelValue': model[key] || (model[key] = 0),
-            'class': className,
-            style,
-            disabled,
-            'onUpdate:modelValue': modelValue,
-          }),
           Enumeration: () => h(ElSelect, {
             'modelValue': model[key],
             'class': className,
@@ -115,9 +110,9 @@ export const jsonSchemaTransformForm = defineComponent({
             disabled,
             placeholder,
             'onUpdate:modelValue': modelValue,
-          },
-          { default: () => (options || []).map((item: any, i: number) => h(ElOption, { value: values?.[i] || i, label: item })) },
-          ),
+          }, {
+            default: () => (options || []).map((item: any, i: number) => h(ElOption, { value: values?.[i] || i, label: item })),
+          }),
           Boolean: () => h(ElSwitch, {
             'modelValue': model[key] || (model[key] = 0),
             'class': className,
@@ -136,31 +131,33 @@ export const jsonSchemaTransformForm = defineComponent({
               ? ElRadio
               : ElRadioButton, { label: values?.[i] || item, disabled: disables?.[i], border }, { default: () => item })),
           }),
-          Checkbox: (type = 'checkbox') => {
-            return h(ElCheckboxGroup, {
-              'modelValue': model[key] || (model[key] = []),
-              'class': className,
-              style,
-              disabled,
-              'onUpdate:modelValue': modelValue,
-            }, {
-              default: () => (options || []).map((item: any, i: number) => h(type === 'checkbox'
-                ? ElCheckbox
-                : ElCheckboxButton, { label: values?.[i] || item, disabled: disables?.[i], border }, { default: () => item })),
-            })
-          },
+          Checkbox: (type = 'checkbox') => h(ElCheckboxGroup, {
+            'modelValue': model[key] || (model[key] = []),
+            'class': className,
+            style,
+            disabled,
+            'onUpdate:modelValue': modelValue,
+          }, {
+            default: () => (options || []).map((item: any, i: number) => h(type === 'checkbox'
+              ? ElCheckbox
+              : ElCheckboxButton, { label: values?.[i] || item, disabled: disables?.[i], border }, { default: () => item })),
+          }),
           CheckboxButton: () => typeComponent.Checkbox('checkboxButton'),
           RadioButton: () => typeComponent.Radio('radioButton'),
           Cascader: () => h(ElCascader, {
             'modelValue': model[key] || (model[key] = []),
             'class': className,
-            options,
+            'options': json?.options || [],
             debounce,
             style,
             disabled,
+            'props': {
+              multiple: cascaderType,
+            },
             placeholder,
             'filterable': true,
             'onUpdate:modelValue': modelValue,
+            'collapse-tags-tooltip': true,
           }),
           Upload: () => h(ElUpload, {
             'fileList': model[key] || (model[key] = []),
@@ -185,25 +182,23 @@ export const jsonSchemaTransformForm = defineComponent({
           throw new Error(`type is required in ${form}`)
         if (colorTitle) {
           styles.value += `
-          .json_${type + _key} .el-form-item__label{
+          .${formItemClass} .el-form-item__label{
             color:${colorTitle};
           }
           `
         }
-        const formItem = h(ElFormItem, {
-          label: name,
+        formList.push(h(ElFormItem, {
+          label,
           prop: key,
           required: !!required,
-          class: `json_${type + _key}`,
+          class: formItemClass,
           position,
           size,
         }, {
           default: () => [h('div', {
             class: ' w-full text-1 lh-4 text-gray-600:50 mb-1',
           }, description), typeComponent[type as keyof TypeComponent]()],
-        })
-
-        formList.push(formItem)
+        }))
         if (children)
           formList.push(...renderForm(children))
         function uploadChange(data: any) {
@@ -216,7 +211,7 @@ export const jsonSchemaTransformForm = defineComponent({
           model[key] = val
         }
         function judgeShow() {
-          const el = document.querySelector(`.json_${type + _key}`)! as HTMLElement
+          const el = document.querySelector(`.${formItemClass}`)! as HTMLElement
           if (!el)
             return
           if (!show)
@@ -243,15 +238,12 @@ export const jsonSchemaTransformForm = defineComponent({
       return formList
     }
     function wrapper(data: any[]) {
-      if (remove)
-        remove?.()
+      remove?.()
       remove = addStyle(styles.value)
       const g1 = transformData(data.filter((item: any) => item.props.position.startsWith('0-')).sort(sortIndex))
       const g2 = transformData(data.filter((item: any) => item.props.position.startsWith('1-')).sort(sortIndex))
       const g3 = transformData(data.filter((item: any) => item.props.position.startsWith('2-')).sort(sortIndex))
-      const max = Math.max(g1.length, g2.length, g3.length)
-      const result = []
-      for (let i = 0; i < max; i++) {
+      return Array.from({ length: Math.max(g1.length, g2.length, g3.length) }).map((item, i) => {
         const col: any[] = []
         const l_1 = (g1[i]?.props && g1[i].props.label) ? 1 : 0
         const l_2 = (g2[i]?.props && g2[i].props.label) ? 1 : 0
@@ -260,15 +252,12 @@ export const jsonSchemaTransformForm = defineComponent({
         l_1 && col.push(h(ElCol, { span: level === 3 ? 8 : level === 2 ? 12 : 24 }, { default: () => g1[i] }))
         l_2 && col.push(h(ElCol, { span: level === 3 ? 8 : level === 2 ? 12 : 24 }, { default: () => g2[i] }))
         l_3 && col.push(h(ElCol, { span: level === 3 ? 8 : level === 2 ? 12 : 24 }, { default: () => g3[i] }))
-        result.push(h(ElRow, { gutter: 10 }, {
+        return h(ElRow, { gutter: 10 }, {
           default: () => col,
-        }))
-      }
-      return result
+        })
+      })
       function sortIndex(a: any, b: any) {
-        if (!b)
-          return -1
-        return a.props.position.split('-')[1] - b.props.position.split('-')[1]
+        return !b ? -1 : a.props.position.split('-')[1] - b.props.position.split('-')[1]
       }
       function transformData(data: any[]) {
         if (!data.length)
@@ -278,7 +267,7 @@ export const jsonSchemaTransformForm = defineComponent({
           return data
         for (let i = +n - 1; i >= 0; i--) {
           data.unshift({
-            name: '',
+            label: '',
             id: `${col}-${n}`,
           })
         }

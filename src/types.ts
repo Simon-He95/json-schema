@@ -7,7 +7,6 @@ export interface TypeComponent {
   Date: () => VNode
   Number: () => VNode
   Enumeration: () => VNode
-  switch: () => VNode
   Boolean: () => VNode
   Radio: (type?: string) => VNode
   Checkbox: (type?: string) => VNode
