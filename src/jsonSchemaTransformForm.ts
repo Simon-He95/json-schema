@@ -56,6 +56,8 @@ export const jsonSchemaTransformForm = defineComponent({
       for (const key in form) {
         const { default: value, key: _key, type, size, limit = 1, cascaderType, colorTitle, json, label, regExp, errMsg, required, class: className, position, style, description, show, maxlength, minlength, options, values, min, max, disabled, disables, border, precision, step, debounce = 300, placeholder, children } = form[key]
         const formItemClass = `json_${type + _key}`
+        const dialogShow = ref(false)
+        const previewSrc = ref('')
         watchEffect(judgeShow, {
           flush: 'post',
         })
@@ -110,9 +112,9 @@ export const jsonSchemaTransformForm = defineComponent({
             disabled,
             placeholder,
             'onUpdate:modelValue': modelValue,
-          }, {
-            default: () => (options || []).map((item: any, i: number) => h(ElOption, { value: values?.[i] || i, label: item })),
-          }),
+          },
+            { default: () => (options || []).map((item: any, i: number) => h(ElOption, { value: values?.[i] || i, label: item })) },
+          ),
           Boolean: () => h(ElSwitch, {
             'modelValue': model[key] || (model[key] = 0),
             'class': className,
@@ -159,24 +161,39 @@ export const jsonSchemaTransformForm = defineComponent({
             'onUpdate:modelValue': modelValue,
             'collapse-tags-tooltip': true,
           }),
-          Upload: () => h(ElUpload, {
-            'fileList': model[key] || (model[key] = []),
-            'class': className,
-            'listType': 'picture-card',
-            'action': '#',
-            'autoUpload': false,
-            limit,
-            style,
-            disabled,
-            'onChange': uploadChange,
-            'onRemove': removeFile,
-            placeholder,
-            'onUpdate:modelValue': modelValue,
-          }, {
-            default: () => {
-              return h(ElIcon, null, { default: () => h(Plus) })
-            },
-          }),
+          Upload: () => {
+            return [
+              h(ElUpload, {
+                'fileList': model[key] || (model[key] = []),
+                'class': className,
+                'listType': 'picture-card',
+                'action': '#',
+                'autoUpload': false,
+                limit,
+                style,
+                disabled,
+                'onChange': uploadChange,
+                'onRemove': removeFile,
+                onPreview,
+                placeholder,
+                'onUpdate:modelValue': modelValue,
+              }, {
+                default: () => {
+                  return h(ElIcon, null, { default: () => h(Plus) })
+                },
+              }),
+              h(ElDialog, {
+                'modelValue': dialogShow.value,
+                'onUpdate:modelValue': val => (dialogShow.value = val),
+              }, {
+                default: () => h('img', {
+                  class: 'w-full',
+                  src: previewSrc.value,
+                  alt: 'Preview Image',
+                }),
+              }),
+            ]
+          },
         }
         if (!type)
           throw new Error(`type is required in ${form}`)
@@ -201,6 +218,10 @@ export const jsonSchemaTransformForm = defineComponent({
         }))
         if (children)
           formList.push(...renderForm(children))
+        function onPreview(uploadFile: any) {
+          previewSrc.value = uploadFile.url
+          dialogShow.value = true
+        }
         function uploadChange(data: any) {
           model[key].push(data)
         }

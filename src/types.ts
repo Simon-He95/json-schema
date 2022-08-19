@@ -13,7 +13,7 @@ export interface TypeComponent {
   CheckboxButton: () => VNode
   RadioButton: () => VNode
   Cascader: () => VNode
-  Upload: () => VNode
+  Upload: () => VNode[]
 }
 
 export interface Schema {
