@@ -216,7 +216,7 @@ export const jsonSchemaTransformForm = defineComponent({
             default: () => {
               return h(ElIcon, null, { default: () => h(Plus) })
             },
-          }),
+          }) as any,
         }
         if (!type)
           throw new Error(`type is required in ${form}`)
