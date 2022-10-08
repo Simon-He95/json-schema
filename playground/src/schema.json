@@ -64,7 +64,6 @@
       "default": "我被switch控制",
       "type": "RichText",
       "label": "textarea",
-      "required": true,
       "show": {
         "switch": {
           "value": true

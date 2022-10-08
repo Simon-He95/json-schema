@@ -19,7 +19,7 @@ export const jsonSchemaTransformForm = defineComponent({
     const model = ref<Record<string, any>>({})
     const rules = reactive<FormRules>({})
     const formEl = ref<HTMLFormElement>()
-    const errors = ref([])
+    const errors = ref<string[]>([])
     const styles = ref('')
     watch(props, () => {
       schema.value = props.schema
@@ -35,7 +35,7 @@ export const jsonSchemaTransformForm = defineComponent({
           const class0 = errors.value[0]
           if (!class0)
             return
-          const el = findElement(`.${class0}`)
+          const el = findElement(`.${class0}`) as HTMLElement
           if (!el)
             return
           el.scrollIntoView({ behavior: 'smooth' })
