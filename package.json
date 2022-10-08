@@ -14,7 +14,9 @@
   },
   "keywords": [
     "json-schema-transform-form",
-    "vue"
+    "vue",
+    "simon-js-tool",
+    "element-plus"
   ],
   "exports": {
     ".": {
