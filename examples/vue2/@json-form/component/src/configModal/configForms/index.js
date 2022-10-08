@@ -1,0 +1,12 @@
+export { default as CommonConfigForm } from './common.vue';
+export { default as InputConfigForm } from './input.vue';
+export { default as RichtextConfigForm } from './richtext.vue';
+export { default as EmailConfigForm } from './email.vue';
+export { default as PhoneConfigForm } from './phone.vue';
+export { default as PasswordConfigForm } from './password.vue';
+export { default as NumberConfigForm } from './number.vue';
+export { default as DateConfigForm } from './date.vue';
+export { default as SelectConfigForm } from './select.vue';
+export { default as EnumConfigForm } from './enum.vue';
+export { default as CascaderConfigForm } from './cascader.vue';
+export { default as SwitchConfigForm } from './switch.vue';

@@ -1,0 +1,32 @@
+{
+  "name": "@json-form/component",
+  "version": "0.0.1",
+  "description": "> TODO: description",
+  "author": "Simon He <hejian1@xindong.com>",
+  "homepage": "",
+  "license": "ISC",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@git.xindong.com:xd-platform/silent/demo-lerna.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "dependencies": {
+    "lodash": "4.17.21",
+    "rollup-plugin-scss": "^3.0.0",
+    "vue": "2.7.10",
+    "vue-json-viewer": "^2.2.22"
+  }
+}

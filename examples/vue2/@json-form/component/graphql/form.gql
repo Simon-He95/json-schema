@@ -1,0 +1,284 @@
+query FormGroups(
+  $first: Int!
+  $page: Int!
+  $ids: [Int!]
+  $code: String
+  $name: String
+  $created_at_from: DateTime
+  $created_at_to: DateTime
+) {
+  FormGroups(
+    first: $first
+    page: $page
+    ids: $ids
+    code: $code
+    name: $name
+    order_by: $order_by
+    created_at: { from: $created_at_from, to: $created_at_to }
+  ) {
+    data {
+      id
+      code # String 编码
+      name # String 名称
+      type # String base 常规表单, single 修改单个, common 组件
+      config # String 主配置
+      category # String 分类
+      fields {
+        # [FormField]
+        id
+        form_id # Int 表 ID
+        key # String 键名
+        type # String 键类型：文本、数字、时间等
+        schema # String 配置信息
+        common_id # Int 关联组件 ID
+        # common # FormGroup
+        sort # Int
+        is_disable # Int 是否禁用
+      }
+      is_disable # Int 是否禁用
+      created_at # String 创建时间
+      updated_at # String 更新时间
+    }
+    paginatorInfo {
+      count
+      currentPage
+      lastPage
+      total
+    }
+  }
+}
+mutation FormGroupCreate(
+  $code: String! # 编码
+  $name: String! # 名称
+  $type: String! # base 常规表单, single 修改单个, common 组件
+  $config: String! # 主配置
+  $category: String # 分类
+) {
+  FormGroupCreate(
+    code: $code
+    name: $name
+    type: $type
+    config: $config
+    category: $category
+  ) {
+    id
+    code
+    category
+    name
+    type
+    config
+  }
+}
+mutation FormGroupUpdate(
+  $id: ID!
+  $code: String # 编码
+  $name: String # 名称
+  $type: String # base 常规表单, single 修改单个, common 组件
+  $config: String # 主配置
+  $is_disable: Int # 是否禁用
+  $category: String # 分类
+) {
+  FormGroupUpdate(
+    id: $id
+    code: $code
+    name: $name
+    type: $type
+    config: $config
+    is_disable: $is_disable
+    category: $category
+  ) {
+    id
+    code
+    name
+    type
+    config
+    is_disable
+    category
+  }
+}
+mutation FormGroupRemove($id: [ID!]!) {
+  FormGroupRemove(id: $id) {
+    id
+  }
+}
+
+# =====================================
+
+query FormFields(
+  $first: Int!
+  $page: Int!
+  $ids: [Int!]
+  $form_id: Int
+  $key: String
+  $created_at_from: DateTime
+  $created_at_to: DateTime
+) {
+  FormFields(
+    first: $first
+    page: $page
+    ids: $ids
+    form_id: $form_id
+    key: $key
+    order_by: $order_by
+    created_at: { from: $created_at_from, to: $created_at_to }
+  ) {
+    data {
+      id
+      form_id # Int 表 ID
+      key # String 键编码
+      label # String 键名
+      type # String 键类型：文本、数字、时间等
+      schema # String 配置信息
+      common_id # Int 关联组件 ID
+      common {
+        # FormGroup
+        id
+        code # String 编码
+        name # String 名称
+        type # String base 常规表单, single 修改单个, common 组件
+        config # String 主配置
+        # 这里可以继续查询
+      }
+      sort # Int
+      is_disable # Int 是否禁用
+      created_at # String 创建时间
+      updated_at # String 更新时间
+    }
+    paginatorInfo {
+      count
+      currentPage
+      lastPage
+      total
+    }
+  }
+}
+mutation FormFieldCreate(
+  $form_id: Int! # 表 ID
+  $key: String! # 键名
+  $label: String!
+  $type: String! # 键类型：文本、数字、时间等
+  $schema: String! # 配置信息
+  $common_id: Int # 关联组件 ID
+  $sort: Int
+) {
+  FormFieldCreate(
+    form_id: $form_id
+    key: $key
+    label: $label
+    type: $type
+    schema: $schema
+    common_id: $common_id
+    sort: $sort
+  ) {
+    id
+    form_id
+    key
+    type
+    schema
+    common_id
+    sort
+  }
+}
+mutation FormFieldUpdate(
+  $id: ID!
+  $key: String # 键名
+  $label: String # 键名
+  $type: String # 键类型：文本、数字、时间等
+  $schema: String # 配置信息
+  $common_id: Int # 关联组件 ID
+  $sort: Int
+  $is_disable: Int # 是否禁用
+) {
+  FormFieldUpdate(
+    id: $id
+    key: $key
+    label: $label
+    type: $type
+    schema: $schema
+    common_id: $common_id
+    sort: $sort
+    is_disable: $is_disable
+  ) {
+    id
+    key
+    label
+    type
+    schema
+    common_id
+    sort
+    is_disable
+  }
+}
+mutation FormFieldRemove($id: [ID!]!) {
+  FormFieldRemove(id: $id) {
+    id
+  }
+}
+
+# =====================================
+
+query FormSubmits(
+  $first: Int!
+  $page: Int!
+  $ids: [Int!]
+  $form_id: Int
+  $created_at_from: DateTime
+  $created_at_to: DateTime
+) {
+  FormSubmits(
+    first: $first
+    page: $page
+    ids: $ids
+    form_id: $form_id
+    order_by: $order_by
+    created_at: { from: $created_at_from, to: $created_at_to }
+  ) {
+    data {
+      id
+      form_id # Int 表 ID
+      data # String 提交数据
+      template_map # String 提交接口数据
+      notice_res # String 接口响应
+      created_at # String 创建时间
+      updated_at # String 更新时间
+    }
+    paginatorInfo {
+      count
+      currentPage
+      lastPage
+      total
+    }
+  }
+}
+mutation FormSubmitCreate(
+  $form_id: Int! # 表 ID
+  $data: String! # 提交数据
+  $template_map: String
+) {
+  FormSubmitCreate(
+    form_id: $form_id
+    data: $data
+    template_map: $template_map
+  ) {
+    id
+    form_id
+    data
+    template_map
+  }
+}
+mutation FormSubmitUpdate(
+  $id: ID!
+  $data: String # 是否禁用
+  $template_map: String
+) {
+  FormSubmitUpdate(id: $id, data: $data, template_map: $template_map) {
+    id
+    data
+    template_map
+  }
+}
+mutation FormSubmitRemove($id: [ID!]!) {
+  FormSubmitRemove(id: $id) {
+    id
+  }
+}

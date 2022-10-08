@@ -1,0 +1,24 @@
+{
+  "name": "@json-form/util",
+  "version": "0.0.1",
+  "description": "> TODO: description",
+  "author": "Simon He <hejian1@xindong.com>",
+  "homepage": "",
+  "license": "ISC",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "src"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "dependencies": {
+  }
+}

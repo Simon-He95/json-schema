@@ -1,0 +1,552 @@
+@mixin formRewrite {
+  .ivu-form-item-label {
+    margin: 0 0 4px 0;
+    padding: 0;
+    font-weight: $font-weight-bold;
+    font-size: $font-size-text;
+    color: $command-text-color;
+    line-height: 1.33;
+  }
+
+  .ivu-form-item-error-tip {
+    font-size: $font-size-text;
+  }
+
+  .ivu-form-item-content {
+    clear: both;
+    & > div {
+      clear: both;
+    }
+  }
+  
+  /* Input start */
+  .ivu-input {
+    height: 34px;
+    padding: 8px 12px;
+    font-size: $font-size-text;
+    line-height: 1.3;
+
+    &:focus,
+    &:hover {
+      border-color: $command-primary-color;
+    }
+  }
+
+  textarea.ivu-input {
+    height: auto;
+    min-height: 34px;
+  }
+  /* Input end */
+
+  /* Input Number start */
+  .ivu-input-number {
+    min-width: 300px;
+    height: 34px;
+
+    &:hover {
+      border-color: $command-primary-color;
+    }
+  }
+  .ivu-input-number-focused {
+    border-color: $command-primary-color;
+  }
+  .ivu-input-number-input-wrap {
+    height: 34px;
+  }
+  .ivu-input-number-input {
+    display: block;
+    height: 34px;
+    padding: 0 12px;
+    font-size: $font-size-text;
+  }
+  .ivu-input-number-handler:hover {
+    .ivu-input-number-handler-down-inner,
+    .ivu-input-number-handler-up-inner {
+      color: $command-primary-color;
+    }
+  }
+  /* Input Number end */
+
+  /* Select start */
+  .ivu-select {
+    .ivu-select-selection {
+      height: 34px;
+      padding: 7px 12px;
+      font-size: $font-size-text;
+    }
+
+    .ivu-select-selected-value,
+    .ivu-select-placeholder,
+    .ivu-select-input {
+      height: auto !important;
+      padding-left: 0 !important;
+      font-size: $font-size-text;
+      line-height: 1.5 !important;
+    }
+  
+    .ivu-select-not-found {
+      font-size: $font-size-text;
+    }
+  
+    .ivu-select-visible .ivu-select-selection,
+    .ivu-select-selection-focused,
+    .ivu-select-selection:hover {
+      border-color: $command-primary-color;
+    }
+  
+    .ivu-select-dropdown {
+      background-color: $white-001;
+      box-shadow: $command-box-shadow;
+  
+      ul.ivu-select-dropdown-list li {
+        &.ivu-select-item {
+          height: 34px;
+          padding: 6px 16px;
+          color: $command-text-color;
+          
+          &:hover {
+            background-color: $command-bg-primary;
+          }
+        }
+  
+        &.ivu-select-item-selected {
+          background-color: $command-bg-primary !important;
+          color: $command-primary-color !important;
+          font-weight: $font-weight-bold !important;
+        }
+      }
+  
+      .ivu-select-group-title {
+        padding-left: 8px;
+        font-size: $font-size-text;
+        font-weight: $font-weight-bold;
+        color: $command-text-color;
+      }
+    }
+  
+    .ivu-select-multiple {
+      .ivu-select-placeholder {
+        margin-top: 6px;
+        font-size: $font-size-text;
+      }
+  
+      .ivu-select-selection {
+        min-height: 34px;
+        height: auto;
+        padding: 0 12px;
+  
+        & > div {
+          padding: 2px 0;
+        }
+      }
+  
+      .ivu-tag {
+        margin: 2px 4px 2px 0;
+      }
+    }
+  }
+
+  /* Select end */
+
+  /* Checkbox start */
+  .ivu-checkbox-wrapper {
+    margin-right: 16px;
+    font-size: $font-size-text;
+    color: $command-text-color;
+  }
+
+  .ivu-checkbox {
+    margin-right: 6px;
+  }
+
+  .ivu-checkbox-checked {
+    .ivu-checkbox-inner {
+      border-color: $command-primary-color;
+      background-color: $command-primary-color;
+
+      &:after {
+        top: 3px;
+        left: 6px;
+      }
+    }
+  }
+
+  .ivu-checkbox-group-item {
+    margin: 0 16px 8px 0;
+  }
+
+  .ivu-checkbox-group {
+    width: 100%;
+  }
+
+  .ivu-checkbox-border {
+    box-sizing: border-box;
+    height: 34px;
+    line-height: 28px;
+    padding: 2px 16px;
+  }
+
+  .ivu-checkbox-wrapper-checked {
+    &.ivu-checkbox-border {
+      border-color: $command-border-color-primary;
+      background-color: $command-bg-primary;
+      font-weight: $font-weight-bold;
+      color: $command-primary-color;
+    }
+  }
+  /* Checkbox end */
+
+  /* Radio start */
+  .ivu-radio-wrapper {
+    margin-right: 16px;
+    font-size: $font-size-text;
+    color: $command-text-color;
+  }
+
+  .ivu-radio-wrapper-checked {
+    &.ivu-radio-border {
+      border-color: $command-border-color-primary;
+      background-color: $command-bg-primary;
+    }
+  }
+  
+  .ivu-radio-checked {
+    .ivu-radio-inner {
+      border-color: $command-primary-color;
+      
+      &::after {
+        background-color: $command-primary-color;
+      }
+    }
+  }
+
+  .ivu-radio-border {
+    height: 34px;
+    line-height: 28px;
+    padding: 2px 16px;
+  }
+  /* Radio end */
+
+  /* Switch start */
+  .ivu-switch:after {
+    top: 2px;
+    left: 2px;
+  }
+  .ivu-switch-checked {
+    border-color: $command-primary-color;
+    background-color: $command-primary-color;
+    
+    &::after {
+      left: 23px;
+    }
+  }
+  /* Switch end */
+
+  /* Date Picker start */
+  .ivu-date-picker-cells-cell {
+    &:hover em {
+      background-color: $command-bg-primary;
+    }
+  }
+
+  .ivu-picker-panel-body-wrapper {
+    font-size: 13px;
+  }
+
+  .ivu-date-picker-cells-month,
+  .ivu-date-picker-cells-year {
+    .ivu-date-picker-cells-cell-focused em {
+      background-color: $command-primary-color;
+      color: $white-001;
+    }
+  }
+
+  .ivu-picker-panel-icon-btn,
+  .ivu-date-picker-header-label {
+    &:hover {
+      color: $command-primary-color;
+    }
+  }
+
+  .ivu-date-picker-cells-focused {
+    em {
+      box-shadow: inset 0 0 0 1px $command-primary-color;
+
+      &:after {
+        background-color: $command-primary-color;
+      }
+    }
+  }
+
+  .ivu-date-picker-focused {
+    input:not([disabled]) {
+      border-color: $command-border-color-primary;
+    }
+  }
+
+  .ivu-picker-confirm {
+    .ivu-btn {
+      font-weight: $font-weight-light;
+    }
+  }
+
+  .ivu-date-picker-cells-cell-selected {
+    em,
+    &:hover em {
+      background-color: $command-primary-color;
+    }
+  }
+
+  .ivu-date-picker-cells-cell-range:before {
+    background-color: $command-bg-primary;
+  }
+  
+  .ivu-date-picker-cells-cell-today em:after {
+    background-color: $command-primary-color;
+  }
+  /* Date Picker end */
+
+  /* Time Picker start */
+  .ivu-time-picker-cells-cell-selected {
+    color: $command-primary-color;
+    background-color: $command-bg-primary;
+    font-weight: $font-weight-normal;
+
+    &:hover {
+      color: $command-primary-color;
+      background-color: $command-bg-primary;
+      font-weight: $font-weight-normal;
+    }
+  }
+  /* Time Picker end */
+
+  /* Custom Comp start */
+  .s-addable-form-group {
+    .ivu-btn {
+      height: 32px;
+    }
+  }
+  /* Custom Comp end */
+
+  /* Silent Editor start */
+  .silent-editor {
+    .ivu-tooltip,
+    .ivu-tooltip-rel,
+    .silent-editor-link-poptip {
+      display: flex;
+      align-items: center;
+      width: 100%;
+
+      & > div {
+        display: flex;
+        align-items: center;
+        width: 100%;
+      }
+    }
+    &-toolbar {
+      padding: 12px 10px;
+
+      .ivu-tooltip-inner {
+        min-height: 34px;
+        line-height: 34px;
+      }
+    }
+
+    &-tool {
+      margin: 0 8px;
+    }
+
+    &-placeholder {
+      left: 12px;
+    }
+
+    .silent-editor-content {
+      padding: 0 12px;
+      min-height: 96px;
+    }
+
+    .silent-editor-link-btn {
+      height: 32px;
+    }
+  }
+  /* Silent Editor end */
+}
+
+@mixin buttonRewrite {
+  .ivu-btn {
+    & > span {
+      display: flex;
+      align-items: center;
+    }
+    .silent-icon,
+    .ivu-icon {
+      margin-right: 4px;
+    }
+    .ivu-icon {
+      font-size: 14px;
+    }
+  }
+
+  .ivu-btn-default {
+    border: 1px solid $command-border-color;
+    background-color: $white-001;
+    color: $command-text-color;
+    font-size: $font-size-text;
+    font-weight: $font-weight-bold;
+
+    .silent-icon {
+      width: 10px;
+
+      & > * {
+        fill: $command-text-color;
+      }
+    }
+  }
+
+  .ivu-btn-secondary {
+    background-color: $command-bg-primary;
+    border: 1px solid $command-border-color-primary;
+    color: $command-primary-color;
+    font-size: $font-size-text;
+    font-weight: $font-weight-bold;
+
+    .silent-icon {
+      width: 10px;
+
+      & > * {
+        fill: $command-primary-color;
+      }
+    }
+  }
+
+  .ivu-btn-primary {
+    background-color: $command-primary-color;
+    border: 1px solid $command-primary-color;
+    color: $white-001;
+    font-size: $font-size-text;
+    font-weight: $font-weight-bold;
+
+    .silent-icon {
+      width: 10px;
+
+      & > * {
+        fill: $white-001;
+      }
+    }
+  }
+
+  .ivu-btn-error {
+    background-color: $command-danger-color;
+    border: 1px solid $command-danger-color;
+    color: $white-001;
+    font-size: $font-size-text;
+    font-weight: $font-weight-bold;
+
+    .silent-icon {
+      width: 10px;
+
+      & > * {
+        fill: $white-001;
+      }
+    }
+  }
+
+  .ivu-btn-success {
+    background-color: $command-success-color;
+    border: 1px solid $command-success-color;
+    color: $white-001;
+    font-size: $font-size-text;
+    font-weight: $font-weight-bold;
+
+    .silent-icon {
+      width: 10px;
+
+      & > * {
+        fill: $white-001;
+      }
+    }
+  }
+
+  .ivu-btn-text {
+    &:hover {
+      color: $command-primary-color;
+    }
+  }
+}
+
+@mixin messageMixin {
+  .ivu-message-notice-content {
+    background-color: $command-bg-primary !important;
+    color: $black-001 !important;
+    border: 1px solid $command-border-color-primary !important;
+    box-shadow: none !important;
+    .ivu-icon {
+      color: $command-primary-color !important;
+    }
+  }
+}
+
+@mixin pageCommon {
+  &-header {
+    padding: 32px 56px 40px;
+    
+    &-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: $command-text-color;
+
+      & > h4 {
+        display: flex;
+        align-items: center;
+      }
+    }
+
+    &-title {
+      display: flex;
+      margin-right: 16px;
+      font-size: $command-font-size-title-large;
+      font-weight: $font-weight-bold;
+    }
+
+    &-opts {
+      flex-shrink: 0;
+      flex-grow: 0;
+
+      ::v-deep {
+        .ivu-btn {
+          margin-left: 8px;
+        }
+      }
+    }
+
+    &-desc {
+      margin-top: 16px;
+      text-align: left;
+      line-height: 1.55;
+      font-size: $command-font-size-title-desc;
+      color: $command-subtext-color;
+      font-weight: $font-weight-light;
+    }
+  }
+
+  &-body {
+    padding: 0 56px;
+  }
+
+  &-empty {
+    margin: 30vh 0 30vh 0;
+    
+    &-tips {
+      margin-top: 8px;
+      color: $command-subtext-color;
+      font-size: $command-font-size-title-sub;
+    }
+
+    ::v-deep {
+      .silent-icon-empty {
+        height: 100px;
+      }
+    }
+  }
+}

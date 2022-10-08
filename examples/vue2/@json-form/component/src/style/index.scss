@@ -1,0 +1,15 @@
+
+@import "./variables.scss";
+@import "./animation.scss";
+@import "./mixins.scss";
+@import "./jsonformRewrite.scss";
+
+* {
+  box-sizing: border-box;
+}
+
+.silent-editor-fontcolor-picker {
+  width: 256px !important;
+}
+
+
