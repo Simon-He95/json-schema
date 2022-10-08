@@ -1,32 +1,73 @@
 <script setup lang="ts">
+import { Codemirror } from 'vue-codemirror'
+import { ElMessage } from 'element-plus'
+import { javascript } from '@codemirror/lang-javascript'
+import { oneDark } from '@codemirror/theme-one-dark'
 import json from './schema.json'
-const schema = ref(null)
-const jsonData = ref(null)
+const schema = ref({})
+const formEl = ref(null)
+const value = JSON.stringify(json, null, 2)
+const extensions = [javascript(), oneDark]
 
 onMounted(() => {
-  jsonData.value = schema.value.getFormData()
+  schema.value = json
 })
+
 async function submit() {
-  const result = await schema.value.submit()
-  // if (result) console.log("can submit", result);
-  // else console.log("cannot submit");
+  const result = await formEl.value.submit()
+  if (result) {
+    const message = JSON.stringify(result, null, 2)
+    console.log(message)
+    ElMessage({
+      showClose: true,
+      message,
+      type: 'success',
+    })
+  }
+  else {
+    ElMessage({
+      showClose: true,
+      message: '校验失败',
+      type: 'error',
+    })
+  }
+}
+const inputChange = (content) => {
+  nextTick(() => {
+    try {
+      schema.value = JSON.parse(content)
+    }
+    catch (error) {}
+  })
 }
 </script>
 
 <template>
   <div p-y-4 flex="~ gap-20" px-5>
     <div w-full>
-      <my-schema ref="schema" :schema="json" />
+      <my-schema ref="formEl" :schema="schema" />
       <el-button @click="submit">
         submit
       </el-button>
     </div>
-    <div px-10 bg-dark-500 color-white:70 w-full>
-      {
-      <div v-for="(value, key, i) in jsonData" :key="key">
-        "{{ key }}": "{{ value }}"{{ i === Object.keys(jsonData).length - 1 ? "" : "," }}
-      </div>
-      }
-    </div>
+    <Codemirror
+      id="monaco"
+      v-model="value"
+      w-full
+      h-full
+      width="100%"
+      :autofocus="true"
+      :indent-with-tab="true"
+      :tab-size="2"
+      :extensions="extensions"
+      @change="inputChange"
+    />
   </div>
 </template>
+
+<style scoped>
+#monaco >>> .cm-editor {
+  height: 100%;
+  width: 100%;
+}
+</style>

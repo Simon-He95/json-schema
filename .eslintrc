@@ -1,6 +1,8 @@
 {
   "extends": "@antfu",
   "rules": {
-    "no-eval": "off"
+    "no-eval": "off",
+    "no-console": "off",
+    "no-alert": "off"
   }
 }

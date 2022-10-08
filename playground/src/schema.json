@@ -9,394 +9,71 @@
     "switch",
     "age"
   ],
-  "form": {
+  "attribs": {
     "age": {
       "max": 80,
       "min": 16,
-      "title": "Age:",
+      "label": "Age:",
       "description": "Enter your age.",
-      "type": "number",
+      "type": "Number",
       "precision": 2,
       "step": 5
     },
     "bio": {
       "maxlength": 10,
-      "title": "Bio:",
-      "type": "string",
-      "rule": {
+      "label": "Bio:",
+      "type": "Text",
+      "required": true,
+      "rules": {
         "[0-9]": "Must contain at least one number.",
         "[a-zA-Z]": "Must contain at least one alpha."
       }
     },
     "checkbox": {
       "options": [
-        "选项一",
-        "选项二"
+        {
+          "label": "选项一",
+          "value": "option-1"
+        },
+        {
+          "label": "选项二",
+          "value": "option-2",
+          "disabled": true
+        }
       ],
-      "disables": [
-        true,
-        false
-      ],
-      "title": "多选:",
-      "type": "checkbox"
-    },
-    "date": {
-      "title": "日期:",
-      "type": "datepicker"
-    },
-    "textarea": {
-      "placeholder": "请输入内容",
-      "type": "textarea",
-      "title": "textarea"
+      "label": "多选:",
+      "type": "Enumeration"
     },
     "firstName": {
       "default": "Jun",
-      "title": "First name:",
-      "type": "string"
+      "label": "First name:",
+      "type": "Text"
     },
     "lastName": {
       "rule": "必须输入Last Name",
-      "title": "Last name:",
-      "type": "string"
-    },
-    "password": {
-      "title": "Password:",
-      "type": "password"
-    },
-    "price": {
-      "description": "最多输入两位小数点，最大值 999999.99",
-      "format": "price",
-      "title": "价格:",
-      "type": "string"
-    },
-    "radio": {
-      "options": [
-        "选项一",
-        "选项二",
-        "选项三"
-      ],
-      "disables": [
-        false,
-        true,
-        false
-      ],
-      "border": true,
-      "title": "单选:",
-      "type": "radio"
-    },
-    "select": {
-      "show": "{{switch }} ",
-      "options": [
-        "Zone one",
-        "Zone two"
-      ],
-      "title": "Activity zone:",
-      "type": "select",
-      "values": [
-        "1",
-        "2"
-      ]
+      "label": "Last name:",
+      "type": "Text",
+      "placeholder": "请输入内容"
     },
     "switch": {
-      "title": "开关:",
-      "type": "switch",
-      "style": "--el-switch-on-color: #ff4949;  --el-switch-off-color: #13ce66;",
-      "children": {
-        "child1": {
-          "type": "string",
-          "title": "子组件1",
-          "default": "子组件1",
-          "show": "{{ switch }} ",
-          "children": {
-            "child1-1": {
-              "type": "string",
-              "title": "子组件1子组件1",
-              "default": "子组件1子组件1",
-              "show": "{{telephone}}.length>0"
-            }
-          }
+      "label": "开关:",
+      "type": "Boolean"
+    },
+    "textarea": {
+      "placeholder": "请输入内容",
+      "default": "我被switch控制",
+      "type": "RichText",
+      "label": "textarea",
+      "required": true,
+      "show": {
+        "switch": {
+          "value": true
         }
       }
     },
-    "telephone": {
-      "minLength": 10,
-      "title": "Telephone:",
-      "type": "string",
-      "rule": {
-        "^1([38]\\d|5[0-35-9]|7[3678])\\d{8}$": "请输入正确的手机号码"
-      }
-    },
-    "cascader": {
-      "type": "cascader",
-      "title": "Cascader:",
-      "options": [
-        {
-          "value": "guide",
-          "label": "Guide",
-          "children": [
-            {
-              "value": "disciplines",
-              "label": "Disciplines",
-              "children": [
-                {
-                  "value": "consistency",
-                  "label": "Consistency"
-                },
-                {
-                  "value": "feedback",
-                  "label": "Feedback"
-                },
-                {
-                  "value": "efficiency",
-                  "label": "Efficiency"
-                },
-                {
-                  "value": "controllability",
-                  "label": "Controllability"
-                }
-              ]
-            },
-            {
-              "value": "navigation",
-              "label": "Navigation",
-              "children": [
-                {
-                  "value": "side nav",
-                  "label": "Side Navigation"
-                },
-                {
-                  "value": "top nav",
-                  "label": "Top Navigation"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "value": "component",
-          "label": "Component",
-          "children": [
-            {
-              "value": "basic",
-              "label": "Basic",
-              "children": [
-                {
-                  "value": "layout",
-                  "label": "Layout"
-                },
-                {
-                  "value": "color",
-                  "label": "Color"
-                },
-                {
-                  "value": "typography",
-                  "label": "Typography"
-                },
-                {
-                  "value": "icon",
-                  "label": "Icon"
-                },
-                {
-                  "value": "button",
-                  "label": "Button"
-                }
-              ]
-            },
-            {
-              "value": "form",
-              "label": "Form",
-              "children": [
-                {
-                  "value": "radio",
-                  "label": "Radio"
-                },
-                {
-                  "value": "checkbox",
-                  "label": "Checkbox"
-                },
-                {
-                  "value": "input",
-                  "label": "Input"
-                },
-                {
-                  "value": "input-number",
-                  "label": "InputNumber"
-                },
-                {
-                  "value": "select",
-                  "label": "Select"
-                },
-                {
-                  "value": "cascader",
-                  "label": "Cascader"
-                },
-                {
-                  "value": "switch",
-                  "label": "Switch"
-                },
-                {
-                  "value": "slider",
-                  "label": "Slider"
-                },
-                {
-                  "value": "time-picker",
-                  "label": "TimePicker"
-                },
-                {
-                  "value": "date-picker",
-                  "label": "DatePicker"
-                },
-                {
-                  "value": "datetime-picker",
-                  "label": "DateTimePicker"
-                },
-                {
-                  "value": "upload",
-                  "label": "Upload"
-                },
-                {
-                  "value": "rate",
-                  "label": "Rate"
-                },
-                {
-                  "value": "form",
-                  "label": "Form"
-                }
-              ]
-            },
-            {
-              "value": "data",
-              "label": "Data",
-              "children": [
-                {
-                  "value": "table",
-                  "label": "Table"
-                },
-                {
-                  "value": "tag",
-                  "label": "Tag"
-                },
-                {
-                  "value": "progress",
-                  "label": "Progress"
-                },
-                {
-                  "value": "tree",
-                  "label": "Tree"
-                },
-                {
-                  "value": "pagination",
-                  "label": "Pagination"
-                },
-                {
-                  "value": "badge",
-                  "label": "Badge"
-                }
-              ]
-            },
-            {
-              "value": "notice",
-              "label": "Notice",
-              "children": [
-                {
-                  "value": "alert",
-                  "label": "Alert"
-                },
-                {
-                  "value": "loading",
-                  "label": "Loading"
-                },
-                {
-                  "value": "message",
-                  "label": "Message"
-                },
-                {
-                  "value": "message-box",
-                  "label": "MessageBox"
-                },
-                {
-                  "value": "notification",
-                  "label": "Notification"
-                }
-              ]
-            },
-            {
-              "value": "navigation",
-              "label": "Navigation",
-              "children": [
-                {
-                  "value": "menu",
-                  "label": "Menu"
-                },
-                {
-                  "value": "tabs",
-                  "label": "Tabs"
-                },
-                {
-                  "value": "breadcrumb",
-                  "label": "Breadcrumb"
-                },
-                {
-                  "value": "dropdown",
-                  "label": "Dropdown"
-                },
-                {
-                  "value": "steps",
-                  "label": "Steps"
-                }
-              ]
-            },
-            {
-              "value": "others",
-              "label": "Others",
-              "children": [
-                {
-                  "value": "dialog",
-                  "label": "Dialog"
-                },
-                {
-                  "value": "tooltip",
-                  "label": "Tooltip"
-                },
-                {
-                  "value": "popover",
-                  "label": "Popover"
-                },
-                {
-                  "value": "card",
-                  "label": "Card"
-                },
-                {
-                  "value": "carousel",
-                  "label": "Carousel"
-                },
-                {
-                  "value": "collapse",
-                  "label": "Collapse"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "value": "resource",
-          "label": "Resource",
-          "children": [
-            {
-              "value": "axure",
-              "label": "Axure Components"
-            },
-            {
-              "value": "sketch",
-              "label": "Sketch Templates"
-            },
-            {
-              "value": "docs",
-              "label": "Design Documentation"
-            }
-          ]
-        }
-      ]
+    "upload": {
+      "placeholder": "请输入内容",
+      "type": "Upload"
     }
   },
   "size": "large",

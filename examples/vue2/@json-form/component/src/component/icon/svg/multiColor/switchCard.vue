@@ -1,3 +1,0 @@
-<template>
-<svg width="1em" height="1em" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="sc-gsDKAQ sc-cjwcjg kMJSxT jWevNH"><rect x="0.5" y="0.5" width="31" height="23" rx="2.5" fill="#EAFBE7" stroke="#C6F0C2"></rect><path d="M19.5 7h-7A4.505 4.505 0 008 11.5c0 2.481 2.019 4.5 4.5 4.5h7c2.481 0 4.5-2.019 4.5-4.5S21.981 7 19.5 7zm0 8a3.5 3.5 0 110-7 3.5 3.5 0 010 7z" fill="#328048"></path></svg>
-</template>
