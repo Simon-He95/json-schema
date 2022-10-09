@@ -75,7 +75,7 @@
       "type": "Upload"
     },
     "familyInfo": {
-      "type": "group",
+      "type": "Group",
       "children": {
         "father": {
           "type": "Text",

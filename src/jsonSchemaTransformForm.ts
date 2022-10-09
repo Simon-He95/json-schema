@@ -45,56 +45,55 @@ export const jsonSchemaTransformForm = defineComponent({
       }),
       resetField: () => formEl.value!.resetFields(),
     })
-    return () => {
-      formList.length = 0
-      errors.value = []
-      return schema.value
-        ? h('div', {
-          style: {
-            textAlign: 'left',
-          },
-        }, [
-          h('h3', {
-            class: 'text-2xl mb-2',
-          }, props.schema.name),
-          h('h1', {
-            class: 'text-sm mb-3',
-          }, props.schema.description),
-          h(ElForm, {
-            ref: formEl,
-            model: model.value,
-            rules,
-            size: props.schema.size,
-            class: props.schema.class,
-          }, { default: () => renderForm(props.schema.attribs) })])
-        : ''
-    }
+    return () => schema.value
+      ? h('div', {
+        style: {
+          textAlign: 'left',
+        },
+      }, [
+        h('h3', {
+          class: 'text-2xl mb-2',
+        }, props.schema.name),
+        h('h1', {
+          class: 'text-sm mb-3',
+        }, props.schema.description),
+        h(ElForm, {
+          ref: formEl,
+          model: model.value,
+          rules,
+          size: props.schema.size,
+          class: props.schema.class,
+        }, { default: () => renderForm(props.schema.attribs) })])
+      : ''
 
     function renderForm(form: Record<string, any>) {
+      formList.length = 0
+      errors.value = []
+
       for (const key in form) {
         const { type } = form[key]
         if (type === 'Group')
           renderGroup(key, form)
         else
           renderField(form, model.value, key)
-
       }
-      return sortByOrder(formList, schema.value.order, 'props.prop')
+      // return sortByOrder(formList, schema.value.order, 'props.prop')
+      return formList
     }
 
     function renderGroup(pKey: string, form: Record<string, any>) {
-      const { label, children, required, } = form
+      const { label, children, required, } = form[pKey]
       const formItemClass = `json_group_${pKey}`
       model.value[pKey] = model.value[pKey] || []
-
       formList.push(h('div', [
         model.value[pKey].map((item: any, index: number) => Object.keys(children).map((key: string) => {
+          // return renderField(children, model.value[pKey][index], key, pKey)
           return h(ElFormItem, {
             class: formItemClass + '_' + key,
             prop: `${pKey}.${key}`,
             label,
             required,
-          }, { default: () => renderField(children, model.value[index], key, pKey) })
+          }, { default: () => renderField(children, model.value[pKey][index], key, pKey) })
         })),
         h(ElButton, {
           type: 'text',
@@ -272,7 +271,6 @@ export const jsonSchemaTransformForm = defineComponent({
           },
         }) as any,
       }
-
       formList.push(h(ElFormItem, {
         label,
         prop: key,
