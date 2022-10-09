@@ -2,12 +2,12 @@
 import type { DefineComponent, VNode } from 'vue'
 import { defineComponent, h, reactive, ref, watch, watchEffect } from 'vue'
 import type { FormRules } from 'element-plus'
-import { ElButton, ElCascader, ElCheckbox, ElCheckboxButton, ElCheckboxGroup, ElDatePicker, ElForm, ElFormItem, ElIcon, ElInput, ElInputNumber, ElOption, ElRadio, ElRadioButton, ElRadioGroup, ElSelect, ElSwitch, ElUpload } from 'element-plus'
+import { ElButton, ElCascader, ElCheckbox, ElCheckboxButton, ElCheckboxGroup, ElCollapse, ElCollapseItem, ElDatePicker, ElForm, ElFormItem, ElIcon, ElInput, ElInputNumber, ElOption, ElRadio, ElRadioButton, ElRadioGroup, ElSelect, ElSwitch, ElUpload } from 'element-plus'
 import { addStyle, findElement, sortByOrder } from 'simon-js-tool'
 import { Delete, Plus } from '@element-plus/icons-vue'
 import type { Schema, TypeComponent } from './types'
 
-// todo panel
+// todo Tabs
 export const jsonSchemaTransformForm = defineComponent({
   props: {
     schema: {
@@ -74,7 +74,7 @@ export const jsonSchemaTransformForm = defineComponent({
       for (const key in form) {
         const { type } = form[key]
         if (type === 'Group')
-          formList.push(...renderGroup(key, form))
+          formList.push(renderGroup(key, form) as any)
         else
           formList.push(renderField(form, model.value, key))
       }
@@ -85,55 +85,55 @@ export const jsonSchemaTransformForm = defineComponent({
     }
 
     function renderGroup(pKey: string, form: Record<string, any>): VNode[] {
-      const { label, children, required } = form[pKey]
+      const { label, children } = form[pKey]
       const formItemClass = `json_group_${pKey}`
       model.value[pKey] = model.value[pKey] || []
       const groupClass = `${formItemClass}_${pKey}`
-      if (model.value[pKey].length) {
-        styles += `.${groupClass}{display:block} .${groupClass}>.el-form-item__content{display:block;
-        border:1px solid #cdd0d6;border-bottom:none; border-radius:5px; padding:10px;,
-      }`
-      }
-      else { styles += `.${groupClass}>.el-form-item__content{display:none}` }
-      return [model.value[pKey].length
-        ? h(ElFormItem, {
-          class: groupClass,
-          required: !!required,
-          prop: pKey,
-          label,
-          style: 'margin-bottom:0;',
-        }, model.value[pKey].map((item: any, index: number) =>
-          h('div', {
-            style: 'position:relative',
-          }, [Object.keys(children).map((key: string) =>
-            renderField(children, model.value[pKey][index], key, pKey, index)),
-          h(Delete, {
-            style: 'position:absolute;top:0;right:0;width: 1em; height: 1em; margin-right: 8px',
-            onClick: () => model.value[pKey].splice(index, 1),
-          }),
-          ]),
-        ))
-        : h(ElFormItem, {
-          class: groupClass,
-          required: !!required,
-          prop: pKey,
-          label,
-          style: 'margin-bottom:0;',
-        }, undefined),
-      h(ElButton, {
-        size: 'default',
-        style: 'margin-bottom:20px;width:100%;',
-        onClick: () => {
-          model.value[pKey].push({})
-        },
-      }, {
-        default: () => '新增',
-      }),
-      ].filter(Boolean) as VNode[]
+      styles += `.${groupClass} .el-collapse-item__content { padding-bottom: 0 ; }`
+      return model.value[pKey].length
+        ? h('div', {
+          props: pKey,
+        }, [
+          h(ElCollapse, {
+            style: 'border-bottom:none',
+            class: groupClass,
+            modelValue: '1',
+          }, h(ElCollapseItem, {
+            name: '1',
+          }, {
+            title: () => h('div', label),
+            default: () => model.value[pKey].map((item: any, index: number) =>
+              h('div', {
+                style: 'position:relative',
+              }, [Object.keys(children).map((key: string) =>
+                renderField(children, model.value[pKey][index], key, pKey, index)),
+              h(Delete, {
+                style: 'position:absolute;top:0;right:0;width: 1em; height: 1em; margin-right: 8px',
+                onClick: () => model.value[pKey].splice(index, 1),
+              }),
+              ]),
+            ),
+          })), h(ElButton, {
+            size: 'large',
+            style: 'margin-bottom:20px;width:100%;',
+            onClick: () => {
+              model.value[pKey].push({})
+            },
+          }, {
+            default: () => '新增',
+          })]) as any
+        : h('div', {
+          style: 'width:200px;cursor:pointer;margin-bottom:20px;box-shadow: rgb(33 33 52 / 10%) 0px 1px 4px;padding: 12px 16px;border-color: rgb(234, 234, 239);border-radius:26px;text-align:center;color: rgb(142, 142, 169);font-size:0.75rem;',
+          onClick: () => {
+            model.value[pKey].push({})
+          },
+        }, {
+          default: () => '创建Group',
+        })
     }
 
     function renderField(obj: Record<string, any>, _model: any, key: string, pKey = '', index = 0) {
-      const { default: value, type, size, limit = 1, cascaderType, colorTitle, json, label, rules: itemRules, required, class: className, position, style, description, show, maxlength, minlength, options, min, max, disabled, border, precision, step, debounce = 300, placeholder } = obj[key]
+      const { default: value, type, size, limit = 1, colorTitle, label, rules: itemRules, multiple = false, required, class: className, position, style, description, show, maxlength, minlength, options = [], min, max, disabled, border, precision, step, debounce = 300, placeholder } = obj[key]
       const formItemClass = pKey
         ? `json_${`${pKey + index}_${key}`}`
         : `json_${`${type}_${key}`}`
@@ -286,7 +286,7 @@ export const jsonSchemaTransformForm = defineComponent({
           placeholder,
           'onUpdate:modelValue': modelValue,
         }, {
-          default: () => (options || []).map((item: any) => h(ElOption, { value: item?.value, label: item?.label, disabled: item?.disabled || false })),
+          default: () => options.map((item: any) => h(ElOption, { value: item?.value, label: item?.label, disabled: item?.disabled || false })),
         }),
         Boolean: () => h(ElSwitch, {
           'modelValue': _model[key] || (_model[key] = false),
@@ -301,7 +301,7 @@ export const jsonSchemaTransformForm = defineComponent({
           style,
           'onUpdate:modelValue': modelValue,
         }, {
-          default: () => (options || []).map((item: any) => h(type === 'radio'
+          default: () => options.map((item: any) => h(type === 'radio'
             ? ElRadio
             : ElRadioButton, { label: item?.value, disabled: item.disabled, border }, { default: () => item?.label })),
         }),
@@ -312,7 +312,7 @@ export const jsonSchemaTransformForm = defineComponent({
           disabled,
           'onUpdate:modelValue': modelValue,
         }, {
-          default: () => (options || []).map((item: any) => h(type === 'checkbox'
+          default: () => options.map((item: any) => h(type === 'checkbox'
             ? ElCheckbox
             : ElCheckboxButton, { label: item?.value, disabled: item?.disabled, border }, { default: () => item?.label })),
         }),
@@ -321,12 +321,12 @@ export const jsonSchemaTransformForm = defineComponent({
         Cascader: () => h(ElCascader, {
           'modelValue': _model[key] || [],
           'class': className,
-          'options': json?.options || [],
+          options,
           debounce,
           style,
           disabled,
           'props': {
-            multiple: cascaderType,
+            multiple,
           },
           placeholder,
           'filterable': true,
