@@ -1,10 +1,10 @@
 // @unocss-include
-import type { DefineComponent, Ref, VNode } from 'vue'
+import type { DefineComponent, VNode } from 'vue'
 import { defineComponent, h, reactive, ref, watch, watchEffect } from 'vue'
 import type { FormRules } from 'element-plus'
-import { ElCascader, ElCheckbox, ElCheckboxButton, ElCheckboxGroup, ElButton, ElDatePicker, ElForm, ElFormItem, ElIcon, ElInput, ElInputNumber, ElOption, ElRadio, ElRadioButton, ElRadioGroup, ElSelect, ElSwitch, ElUpload } from 'element-plus'
-import { findElement, sortByOrder } from 'simon-js-tool'
-import { Plus } from '@element-plus/icons-vue'
+import { ElButton, ElCascader, ElCheckbox, ElCheckboxButton, ElCheckboxGroup, ElDatePicker, ElForm, ElFormItem, ElIcon, ElInput, ElInputNumber, ElOption, ElRadio, ElRadioButton, ElRadioGroup, ElSelect, ElSwitch, ElUpload } from 'element-plus'
+import { addStyle, findElement, sortByOrder } from 'simon-js-tool'
+import { Delete, Plus } from '@element-plus/icons-vue'
 import type { Schema, TypeComponent } from './types'
 
 export const jsonSchemaTransformForm = defineComponent({
@@ -20,8 +20,9 @@ export const jsonSchemaTransformForm = defineComponent({
     const rules = reactive<FormRules>({})
     const formEl = ref<HTMLFormElement>()
     const errors = ref<string[]>([])
-    const styles = ref('')
+    let styles = ''
     const formList = [] as VNode[]
+    let stop: () => void
 
     watch(props, () => {
       schema.value = props.schema
@@ -68,106 +69,185 @@ export const jsonSchemaTransformForm = defineComponent({
 
     function renderForm(form: Record<string, any>) {
       formList.length = 0
-      errors.value = []
-
+      errors.value.length = 0
       for (const key in form) {
         const { type } = form[key]
         if (type === 'Group')
-          renderGroup(key, form)
+          formList.push(...renderGroup(key, form))
         else
-          renderField(form, model.value, key)
+          formList.push(renderField(form, model.value, key))
       }
-      // return sortByOrder(formList, schema.value.order, 'props.prop')
-      return formList
+      if (stop)
+        stop?.()
+      stop = addStyle(styles)
+      return sortByOrder(formList, schema.value.order, 'props.prop')
     }
 
-    function renderGroup(pKey: string, form: Record<string, any>) {
-      const { label, children, required, } = form[pKey]
+    function renderGroup(pKey: string, form: Record<string, any>): VNode[] {
+      const { label, children, required } = form[pKey]
       const formItemClass = `json_group_${pKey}`
       model.value[pKey] = model.value[pKey] || []
-      formList.push(h('div', [
-        model.value[pKey].map((item: any, index: number) => Object.keys(children).map((key: string) => {
-          // return renderField(children, model.value[pKey][index], key, pKey)
-          return h(ElFormItem, {
-            class: formItemClass + '_' + key,
-            prop: `${pKey}.${key}`,
-            label,
-            required,
-          }, { default: () => renderField(children, model.value[pKey][index], key, pKey) })
-        })),
-        h(ElButton, {
-          type: 'text',
-          onClick: () => {
-            model.value[pKey].push({})
-          }
-        }, {
-          default: () => h(ElIcon, null, { default: () => h(Plus) })
-        }),
-      ]))
-
+      const groupClass = `${formItemClass}_${pKey}`
+      if (model.value[pKey].length) {
+        styles += `.${groupClass}{display:block} .${groupClass}>.el-form-item__content{display:block;
+        border:1px solid #cdd0d6;border-bottom:none; border-radius:5px; padding:10px;,
+      }`
+      }
+      else { styles += `.${groupClass}>.el-form-item__content{display:none}` }
+      return [model.value[pKey].length
+        ? h(ElFormItem, {
+          class: groupClass,
+          required: !!required,
+          prop: pKey,
+          label,
+          style: 'margin-bottom:0;',
+        }, model.value[pKey].map((item: any, index: number) =>
+          h('div', {
+            style: 'position:relative',
+          }, [Object.keys(children).map((key: string) =>
+            renderField(children, model.value[pKey][index], key, pKey, index)),
+          h(Delete, {
+            style: 'position:absolute;top:0;right:0;width: 1em; height: 1em; margin-right: 8px',
+            onClick: () => model.value[pKey].splice(index, 1),
+          }),
+          ]),
+        ))
+        : h(ElFormItem, {
+          class: groupClass,
+          required: !!required,
+          prop: pKey,
+          label,
+          style: 'margin-bottom:0;',
+        }, undefined),
+      h(ElButton, {
+        size: 'default',
+        style: 'margin-bottom:20px;width:100%;',
+        onClick: () => {
+          model.value[pKey].push({})
+        },
+      }, {
+        default: () => '新增',
+      }),
+      ].filter(Boolean) as VNode[]
     }
 
-    function renderField(obj: Record<string, any>, model: any, key: string, pKey: string = '') {
-      const { default: value, type, size, limit = 1, cascaderType, colorTitle, json, label, rules: itemRules, required, class: className, position, style, description, show, maxlength, minlength, options, min, max, disabled, border, precision, step, debounce = 300, placeholder, children } = obj[key]
-
+    function renderField(obj: Record<string, any>, _model: any, key: string, pKey = '', index = 0) {
+      const { default: value, type, size, limit = 1, cascaderType, colorTitle, json, label, rules: itemRules, required, class: className, position, style, description, show, maxlength, minlength, options, min, max, disabled, border, precision, step, debounce = 300, placeholder } = obj[key]
       const formItemClass = pKey
-        ? `json_${pKey + '_' + key}`
-        : `json_${type + '_' + key}`
+        ? `json_${`${pKey + index}_${key}`}`
+        : `json_${`${type}_${key}`}`
 
       if (!type)
         throw new Error(`type is required in ${obj}`)
-      if (colorTitle)
-        styles.value += `
+      if (colorTitle) {
+        styles += `
           .${formItemClass} .el-form-item__label{
             color:${colorTitle};
           }
           `
+      }
+      else {
+        styles += `
+            .el-form-item .el-form-item{
+              margin-bottom:22px;
+            }
+          `
+      }
       watchEffect(judgeShow, {
         flush: 'post',
       })
-      if (value !== undefined) {
-        model[key] = value || ''
-      }
+      if (value !== undefined)
+        _model[key] = value || ''
+
       if (itemRules) {
-        rules[key] = [
-          {
-            validator: (o, value = '', callback) => {
-              Object.keys(itemRules).forEach((rule) => {
-                const errMsg = itemRules[rule]
-                const reg = new RegExp(rule)
-                if (!reg.test(value)) {
+        if (pKey) {
+          rules[`${pKey}[${index}]${key}`] = [
+            {
+              required: !!required,
+              validator: (o, value = '', callback) => {
+                Object.keys(itemRules).forEach((rule) => {
+                  const errMsg = itemRules[rule]
+                  const reg = new RegExp(rule)
+                  if (!reg.test(value)) {
+                    if (!errors.value.includes(formItemClass))
+                      errors.value.push(formItemClass)
+                    return callback(
+                      new Error(errMsg || `${key} is invalid`),
+                    )
+                  }
+                  else if (errors.value.includes(formItemClass)) { errors.value.splice(errors.value.indexOf(formItemClass), 1) }
+                })
+                callback()
+              },
+            },
+          ]
+        }
+        else {
+          rules[key] = [
+            {
+              required: !!required,
+              validator: (o, value = '', callback) => {
+                Object.keys(itemRules).forEach((rule) => {
+                  const errMsg = itemRules[rule]
+                  const reg = new RegExp(rule)
+                  if (!reg.test(value)) {
+                    if (!errors.value.includes(formItemClass))
+                      errors.value.push(formItemClass)
+                    return callback(
+                      new Error(errMsg || `${key} is invalid`),
+                    )
+                  }
+                  else if (errors.value.includes(formItemClass)) { errors.value.splice(errors.value.indexOf(formItemClass), 1) }
+                })
+                callback()
+              },
+            },
+          ]
+        }
+      }
+      else if (required) {
+        if (pKey) {
+          rules[`${pKey}[${index}]${key}`] = [
+            {
+              required: !!required,
+              validator: (o, _, callback) => {
+                const value = _model[key]
+                if (!value) {
                   if (!errors.value.includes(formItemClass))
                     errors.value.push(formItemClass)
                   return callback(
-                    new Error(errMsg || `${key} is invalid`),
+                    new Error(`${key} is required`),
                   )
                 }
                 else if (errors.value.includes(formItemClass)) { errors.value.splice(errors.value.indexOf(formItemClass), 1) }
-              })
-              callback()
+                callback()
+              },
             },
-          },
-        ]
-      }
-      else if (required) {
-        rules[key] = [
-          {
-            validator: (o, value, callback) => {
-              if (value !== undefined) {
-                if (!errors.value.includes(formItemClass))
-                  errors.value.push(formItemClass)
-                return callback(
-                  new Error(`${key} is required`),
-                )
-              }
-              callback()
+          ]
+        }
+        else {
+          rules[key] = [
+            {
+              required: !!required,
+              validator: (o, _, callback) => {
+                const value = _model[key]
+                if (!value) {
+                  if (!errors.value.includes(formItemClass))
+                    errors.value.push(formItemClass)
+                  return callback(
+                    new Error(`${key} is required`),
+                  )
+                }
+                else if (errors.value.includes(formItemClass)) { errors.value.splice(errors.value.indexOf(formItemClass), 1) }
+                callback()
+              },
             },
-          },
-        ]
+          ]
+        }
       }
       const typeComponent: TypeComponent = {
         Text: (type = 'text') => h(ElInput, {
-          'modelValue': model[key],
+          'modelValue': _model[key],
           'class': className,
           style,
           maxlength,
@@ -181,14 +261,14 @@ export const jsonSchemaTransformForm = defineComponent({
         RichText: () => typeComponent.Text('textarea'),
         Password: () => typeComponent.Text('password'),
         Date: () => h(ElDatePicker, {
-          'modelValue': model[key],
+          'modelValue': _model[key],
           'class': className,
           style,
           disabled,
           'onUpdate:modelValue': modelValue,
         }),
         Number: () => h(ElInputNumber, {
-          'modelValue': model[key] || 0,
+          'modelValue': _model[key] || 0,
           'class': className,
           style,
           disabled,
@@ -199,7 +279,7 @@ export const jsonSchemaTransformForm = defineComponent({
           'onUpdate:modelValue': modelValue,
         }),
         Enumeration: () => h(ElSelect, {
-          'modelValue': model[key],
+          'modelValue': _model[key],
           'class': className,
           style,
           placeholder,
@@ -208,14 +288,14 @@ export const jsonSchemaTransformForm = defineComponent({
           default: () => (options || []).map((item: any) => h(ElOption, { value: item?.value, label: item?.label, disabled: item?.disabled || false })),
         }),
         Boolean: () => h(ElSwitch, {
-          'modelValue': model[key] || (model[key] = false),
+          'modelValue': _model[key] || (_model[key] = false),
           'class': className,
           style,
           disabled,
           'onUpdate:modelValue': modelValue,
         }),
         Radio: (type = 'radio') => h(ElRadioGroup, {
-          'modelValue': model[key],
+          'modelValue': _model[key],
           'class': className,
           style,
           'onUpdate:modelValue': modelValue,
@@ -225,7 +305,7 @@ export const jsonSchemaTransformForm = defineComponent({
             : ElRadioButton, { label: item?.value, disabled: item.disabled, border }, { default: () => item?.label })),
         }),
         Checkbox: (type = 'checkbox') => h(ElCheckboxGroup, {
-          'modelValue': model[key] || [],
+          'modelValue': _model[key] || [],
           'class': className,
           style,
           disabled,
@@ -238,7 +318,7 @@ export const jsonSchemaTransformForm = defineComponent({
         CheckboxButton: () => typeComponent.Checkbox('checkboxButton'),
         RadioButton: () => typeComponent.Radio('radioButton'),
         Cascader: () => h(ElCascader, {
-          'modelValue': model[key] || [],
+          'modelValue': _model[key] || [],
           'class': className,
           'options': json?.options || [],
           debounce,
@@ -253,7 +333,7 @@ export const jsonSchemaTransformForm = defineComponent({
           'collapse-tags-tooltip': true,
         }),
         Upload: () => h(ElUpload, {
-          'fileList': model[key] || [],
+          'fileList': _model[key] || [],
           'class': className,
           'listType': 'picture-card',
           'action': '#',
@@ -271,10 +351,9 @@ export const jsonSchemaTransformForm = defineComponent({
           },
         }) as any,
       }
-      formList.push(h(ElFormItem, {
+      return h(ElFormItem, {
         label,
-        prop: key,
-        required: !!required,
+        prop: pKey ? `${pKey}[${index}]${key}` : key,
         class: formItemClass,
         position,
         size,
@@ -282,18 +361,17 @@ export const jsonSchemaTransformForm = defineComponent({
         default: () => [h('div', {
           class: ' w-full text-1 lh-4 text-gray-600:50 mb-1',
         }, description), typeComponent[type as keyof TypeComponent]()],
-      }))
-
+      })
 
       function uploadChange(data: any) {
-        model[key] = model[key] || []
-        model[key].push(data)
+        _model[key] = _model[key] || []
+        _model[key].push(data)
       }
       function removeFile(data: any) {
-        model[key].splice(data, 1)
+        _model[key].splice(data, 1)
       }
       function modelValue(val: any) {
-        model[key] = val
+        _model[key] = val
       }
       function judgeShow() {
         const el = document.querySelector(`.${formItemClass}`)! as HTMLElement
@@ -302,7 +380,7 @@ export const jsonSchemaTransformForm = defineComponent({
         if (!show)
           return el.style.display = 'block'
         for (const key in show) {
-          const value = model[key]
+          const value = _model[key]
           const data = show[key]
           const datavalue = data.value
           if (datavalue && value !== datavalue)
@@ -321,6 +399,5 @@ export const jsonSchemaTransformForm = defineComponent({
         return el.style.display = 'block'
       }
     }
-
   },
 }) as DefineComponent<{ schema: Schema }, {}, { getFormData: () => Record<string, any>; submit: () => Promise<boolean | Record<string, any>> }>

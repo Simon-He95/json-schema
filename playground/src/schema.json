@@ -7,6 +7,7 @@
     "*",
     "date",
     "switch",
+    "textarea",
     "age"
   ],
   "attribs": {
@@ -76,14 +77,16 @@
     },
     "familyInfo": {
       "type": "Group",
+      "label": "FamilyInfo",
       "children": {
-        "father": {
+        "name": {
           "type": "Text",
-          "label": "父亲"
+          "label": "name",
+          "required": true
         },
         "mother": {
           "type": "Text",
-          "label": "母亲"
+          "label": "relationship"
         }
       }
     }
