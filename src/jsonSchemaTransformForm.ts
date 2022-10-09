@@ -7,6 +7,7 @@ import { addStyle, findElement, sortByOrder } from 'simon-js-tool'
 import { Delete, Plus } from '@element-plus/icons-vue'
 import type { Schema, TypeComponent } from './types'
 
+// todo panel
 export const jsonSchemaTransformForm = defineComponent({
   props: {
     schema: {
