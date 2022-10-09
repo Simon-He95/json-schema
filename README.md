@@ -1,9 +1,7 @@
-<span><div style="text-align: center;">
+<span><div align="center">
 ![img](/assets/icon.jpg)
 </div></span>
 
-
-## JSON Schema
 将JSON数据转换为表单，并具有表单的特性
 
 ## 优势
