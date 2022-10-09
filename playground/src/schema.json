@@ -73,6 +73,19 @@
     "upload": {
       "placeholder": "请输入内容",
       "type": "Upload"
+    },
+    "familyInfo": {
+      "type": "group",
+      "children": {
+        "father": {
+          "type": "Text",
+          "label": "父亲"
+        },
+        "mother": {
+          "type": "Text",
+          "label": "母亲"
+        }
+      }
     }
   },
   "size": "large",
