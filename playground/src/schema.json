@@ -89,6 +89,27 @@
           "label": "relationship"
         }
       }
+    },
+    "tabs": {
+      "type": "Tabs",
+      "children": [
+        {
+          "label": "User",
+          "children": {
+            "firstName": {
+              "default": "Jun",
+              "label": "First name:",
+              "type": "Text"
+            },
+            "lastName": {
+              "rule": "必须输入Last Name",
+              "label": "Last name:",
+              "type": "Text",
+              "placeholder": "请输入内容"
+            }
+          }
+        }
+      ]
     }
   },
   "size": "large",

@@ -65,10 +65,10 @@ export const jsonSchemaTransformForm = defineComponent({
           rules,
           size: props.schema.size,
           class: props.schema.class,
-        }, { default: () => renderForm(props.schema.attribs) })])
+        }, { default: () => renderForm(props.schema.attribs, model.value) })])
       : ''
 
-    function renderForm(form: Record<string, any>) {
+    function renderForm(form: Record<string, any>, _model: any, pKey = '', index = 0) {
       formList.length = 0
       errors.value.length = 0
       for (const key in form) {
@@ -76,7 +76,7 @@ export const jsonSchemaTransformForm = defineComponent({
         if (type === 'Group')
           formList.push(renderGroup(key, form) as any)
         else
-          formList.push(renderField(form, model.value, key))
+          formList.push(renderField(form, _model, key, pKey, index) as any)
       }
       if (stop)
         stop?.()
@@ -90,6 +90,7 @@ export const jsonSchemaTransformForm = defineComponent({
       model.value[pKey] = model.value[pKey] || []
       const groupClass = `${formItemClass}_${pKey}`
       styles += `.${groupClass} .el-collapse-item__content { padding-bottom: 0 ; }`
+      debugger
       return model.value[pKey].length
         ? h('div', {
           props: pKey,
@@ -105,12 +106,12 @@ export const jsonSchemaTransformForm = defineComponent({
             default: () => model.value[pKey].map((item: any, index: number) =>
               h('div', {
                 style: 'position:relative',
-              }, [Object.keys(children).map((key: string) =>
-                renderField(children, model.value[pKey][index], key, pKey, index)),
-              h(Delete, {
-                style: 'position:absolute;top:0;right:0;width: 1em; height: 1em; margin-right: 8px',
-                onClick: () => model.value[pKey].splice(index, 1),
-              }),
+              }, [
+                renderForm(children, model.value[pKey][index], pKey, index),
+                h(Delete, {
+                  style: 'position:absolute;top:0;right:0;width: 1em; height: 1em; margin-right: 8px',
+                  onClick: () => model.value[pKey].splice(index, 1),
+                }),
               ]),
             ),
           })), h(ElButton, {
@@ -352,6 +353,8 @@ export const jsonSchemaTransformForm = defineComponent({
           },
         }) as any,
       }
+      const component = typeComponent[type as keyof TypeComponent]?.()
+      if (!component) return null
       return h(ElFormItem, {
         label,
         prop: pKey ? `${pKey}[${index}]${key}` : key,
@@ -361,7 +364,7 @@ export const jsonSchemaTransformForm = defineComponent({
       }, {
         default: () => [h('div', {
           class: ' w-full text-1 lh-4 text-gray-600:50 mb-1',
-        }, description), typeComponent[type as keyof TypeComponent]()],
+        }, description), component],
       })
 
       function uploadChange(data: any) {
