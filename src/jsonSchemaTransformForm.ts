@@ -158,7 +158,7 @@ export const jsonSchemaTransformForm = defineComponent({
       watchEffect(judgeShow, {
         flush: 'post',
       })
-      if (value !== undefined)
+      if (value !== undefined && !_model[key])
         _model[key] = value || ''
 
       if (itemRules) {
@@ -249,7 +249,7 @@ export const jsonSchemaTransformForm = defineComponent({
       }
       const typeComponent: TypeComponent = {
         Text: (type = 'text') => h(ElInput, {
-          'modelValue': _model[key],
+          modelValue: _model[key],
           'class': className,
           style,
           maxlength,
@@ -263,14 +263,14 @@ export const jsonSchemaTransformForm = defineComponent({
         RichText: () => typeComponent.Text('textarea'),
         Password: () => typeComponent.Text('password'),
         Date: () => h(ElDatePicker, {
-          'modelValue': _model[key],
+          modelValue: _model[key],
           'class': className,
           style,
           disabled,
           'onUpdate:modelValue': modelValue,
         }),
         Number: () => h(ElInputNumber, {
-          'modelValue': _model[key] || 0,
+          modelValue: _model[key] || 0,
           'class': className,
           style,
           disabled,
@@ -281,7 +281,7 @@ export const jsonSchemaTransformForm = defineComponent({
           'onUpdate:modelValue': modelValue,
         }),
         Enumeration: () => h(ElSelect, {
-          'modelValue': _model[key],
+          modelValue: _model[key],
           'class': className,
           style,
           placeholder,
@@ -290,14 +290,14 @@ export const jsonSchemaTransformForm = defineComponent({
           default: () => options.map((item: any) => h(ElOption, { value: item?.value, label: item?.label, disabled: item?.disabled || false })),
         }),
         Boolean: () => h(ElSwitch, {
-          'modelValue': _model[key] || (_model[key] = false),
+          modelValue: _model[key] || (_model[key] = false),
           'class': className,
           style,
           disabled,
           'onUpdate:modelValue': modelValue,
         }),
         Radio: (type = 'radio') => h(ElRadioGroup, {
-          'modelValue': _model[key],
+          modelValue: _model[key],
           'class': className,
           style,
           'onUpdate:modelValue': modelValue,
@@ -307,7 +307,7 @@ export const jsonSchemaTransformForm = defineComponent({
             : ElRadioButton, { label: item?.value, disabled: item.disabled, border }, { default: () => item?.label })),
         }),
         Checkbox: (type = 'checkbox') => h(ElCheckboxGroup, {
-          'modelValue': _model[key] || [],
+          modelValue: _model[key] || [],
           'class': className,
           style,
           disabled,
@@ -320,7 +320,7 @@ export const jsonSchemaTransformForm = defineComponent({
         CheckboxButton: () => typeComponent.Checkbox('checkboxButton'),
         RadioButton: () => typeComponent.Radio('radioButton'),
         Cascader: () => h(ElCascader, {
-          'modelValue': _model[key] || [],
+          modelValue: _model[key] || [],
           'class': className,
           options,
           debounce,
