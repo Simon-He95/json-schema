@@ -3,9 +3,10 @@ import { Codemirror } from 'vue-codemirror'
 import { ElMessage } from 'element-plus'
 import { javascript } from '@codemirror/lang-javascript'
 import { oneDark } from '@codemirror/theme-one-dark'
+import { nextTick, onMounted, ref } from 'vue'
 import json from './schema.json'
 const schema = ref({})
-const formEl = ref(null)
+const formEl = ref()
 const value = JSON.stringify(json, null, 2)
 const extensions = [javascript(), oneDark]
 
@@ -14,8 +15,8 @@ onMounted(() => {
 })
 
 async function submit() {
-  const result = await formEl.value.submit()
-  if (result) {
+  const { status, result } = await formEl.value.submit()
+  if (status) {
     const message = JSON.stringify(result, null, 2)
     console.log(message)
     ElMessage({
@@ -27,12 +28,12 @@ async function submit() {
   else {
     ElMessage({
       showClose: true,
-      message: '校验失败',
+      message: result[0],
       type: 'error',
     })
   }
 }
-const inputChange = (content) => {
+const inputChange = (content: string) => {
   nextTick(() => {
     try {
       schema.value = JSON.parse(content)

@@ -20,7 +20,7 @@ export const jsonSchemaTransformForm = defineComponent({
     const model = ref<Record<string, any>>({})
     const rules = reactive<FormRules>({})
     const formEl = ref<HTMLFormElement>()
-    const errors = ref<string[]>([])
+    const errors = ref<{ class: string; errMsg: string }[]>([])
     let styles = ''
     const formList = [] as VNode[]
     let stop: () => void
@@ -35,11 +35,17 @@ export const jsonSchemaTransformForm = defineComponent({
       getFormData: () => model.value,
       submit: () => new Promise((resolve) => {
         formEl.value!.validate((valid: boolean) => {
-          resolve(valid && model.value)
           const class0 = errors.value[0]
+          const resolver = {
+            status: valid,
+            result: valid
+              ? model.value
+              : errors.value.map(item => item.errMsg),
+          }
+          resolve(resolver)
           if (!class0)
             return
-          const el = findElement(`.${class0}`) as HTMLElement
+          const el = findElement(`.${class0.class}`) as HTMLElement
           if (!el)
             return
           el.scrollIntoView({ behavior: 'smooth' })
@@ -166,18 +172,13 @@ export const jsonSchemaTransformForm = defineComponent({
             {
               required: !!required,
               validator: (o, value = '', callback) => {
-                Object.keys(itemRules).forEach((rule) => {
-                  const errMsg = itemRules[rule]
-                  const reg = new RegExp(rule)
-                  if (!reg.test(value)) {
-                    if (!errors.value.includes(formItemClass))
-                      errors.value.push(formItemClass)
-                    return callback(
-                      new Error(errMsg || `${key} is invalid`),
-                    )
-                  }
-                  else if (errors.value.includes(formItemClass)) { errors.value.splice(errors.value.indexOf(formItemClass), 1) }
-                })
+                for (const k in itemRules) {
+                  const errMsg = itemRules[k] || `${key} is invalid`
+                  const reg = new RegExp(k)
+                  const passed = reg.test(value)
+                  if (!validator(passed, errMsg, callback))
+                    return
+                }
                 callback()
               },
             },
@@ -188,18 +189,13 @@ export const jsonSchemaTransformForm = defineComponent({
             {
               required: !!required,
               validator: (o, value = '', callback) => {
-                Object.keys(itemRules).forEach((rule) => {
-                  const errMsg = itemRules[rule]
-                  const reg = new RegExp(rule)
-                  if (!reg.test(value)) {
-                    if (!errors.value.includes(formItemClass))
-                      errors.value.push(formItemClass)
-                    return callback(
-                      new Error(errMsg || `${key} is invalid`),
-                    )
-                  }
-                  else if (errors.value.includes(formItemClass)) { errors.value.splice(errors.value.indexOf(formItemClass), 1) }
-                })
+                for (const k in itemRules) {
+                  const errMsg = itemRules[k] || `${key} is invalid`
+                  const reg = new RegExp(k)
+                  const passed = reg.test(value)
+                  if (!validator(passed, errMsg, callback))
+                    return
+                }
                 callback()
               },
             },
@@ -213,15 +209,9 @@ export const jsonSchemaTransformForm = defineComponent({
               required: !!required,
               validator: (o, _, callback) => {
                 const value = _model[key]
-                if (!value) {
-                  if (!errors.value.includes(formItemClass))
-                    errors.value.push(formItemClass)
-                  return callback(
-                    new Error(`${key} is required`),
-                  )
-                }
-                else if (errors.value.includes(formItemClass)) { errors.value.splice(errors.value.indexOf(formItemClass), 1) }
-                callback()
+                const errMsg = `${key} is required`
+                if (validator(value, errMsg, callback))
+                  callback()
               },
             },
           ]
@@ -232,15 +222,9 @@ export const jsonSchemaTransformForm = defineComponent({
               required: !!required,
               validator: (o, _, callback) => {
                 const value = _model[key]
-                if (!value) {
-                  if (!errors.value.includes(formItemClass))
-                    errors.value.push(formItemClass)
-                  return callback(
-                    new Error(`${key} is required`),
-                  )
-                }
-                else if (errors.value.includes(formItemClass)) { errors.value.splice(errors.value.indexOf(formItemClass), 1) }
-                callback()
+                const errMsg = `${key} is required`
+                if (validator(value, errMsg, callback))
+                  callback()
               },
             },
           ]
@@ -402,6 +386,24 @@ export const jsonSchemaTransformForm = defineComponent({
 
         return el.style.display = 'block'
       }
+
+      function validator(passed: boolean, errMsg: string, callback: (err?: any) => void): boolean {
+        if (!passed) {
+          const idx = errors.value.findIndex(item => item.class === formItemClass)
+          if (idx === -1)
+            errors.value.push({ class: formItemClass, errMsg })
+          callback(
+            new Error(errMsg),
+          )
+          return false
+        }
+        else {
+          const idx = errors.value.findIndex(item => item.class === formItemClass)
+          if (idx >= 0)
+            errors.value.splice(idx, 1)
+        }
+        return true
+      }
     }
   },
-}) as DefineComponent<{ schema: Schema }, {}, { getFormData: () => Record<string, any>; submit: () => Promise<boolean | Record<string, any>> }>
+}) as DefineComponent<{ schema: Schema }, {}, { getFormData: () => Record<string, any>; submit: () => Promise<{ status: boolean; errors: string[] }> }>
